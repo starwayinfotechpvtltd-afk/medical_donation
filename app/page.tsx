@@ -4,11 +4,15 @@ import { Navbar } from "@/components/Navbar";
 import { Footer } from "@/components/Footer";
 import { SectionHeading } from "@/components/SectionHeading";
 import { DoctorCard } from "@/components/DoctorCard";
-import { DepartmentCard } from "@/components/DepartmentCard";
 import { doctors } from "@/data/doctors";
 import { departments } from "@/data/departments";
 import { hospitalInfo } from "@/data/hospital";
-import { Stethoscope, Heart, Users, Clock, Gift, Heart as HeartIcon } from "lucide-react";
+import { Stethoscope, Heart, Users, Clock, HeartIcon } from "lucide-react";
+import HeroSection from "@/components/Home/HeroSection";
+import HomeAboutSection from "@/components/Home/HomeAboutSection";
+import HomeServicesSection from "@/components/Home/HomeServicesSection";
+import TestimonialsSection from "@/components/Home/TestimonialsSection";
+import DepartmentCard from "@/components/Home/DepartmentCard";
 
 export default function Home() {
   const featuredDoctors = doctors.slice(0, 3);
@@ -19,115 +23,27 @@ export default function Home() {
       <Navbar />
       <main>
         {/* Hero Section */}
-        <section className="bg-gradient-to-r from-emerald-50 to-blue-50 py-20 md:py-32">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div className="grid md:grid-cols-2 gap-12 items-center">
-              <div>
-                <h1 className="text-5xl md:text-6xl font-bold text-slate-900 mb-6 text-balance leading-tight">
-                  Your Health, Our Priority
-                </h1>
-                <p className="text-xl text-slate-700 mb-8 leading-relaxed text-balance">
-                  Welcome to Advanced Medical Care Hospital. We provide comprehensive healthcare
-                  services with expert physicians and state-of-the-art medical technology.
-                </p>
-                <div className="flex flex-col sm:flex-row gap-4">
-                  <Link
-                    href="/appointment"
-                    className="bg-emerald-500 text-white px-8 py-3 rounded-lg font-semibold text-lg hover:bg-emerald-600 transition-colors text-center"
-                  >
-                    Book Appointment
-                  </Link>
-                  <Link
-                    href="/about"
-                    className="border-2 border-emerald-500 text-emerald-500 px-8 py-3 rounded-lg font-semibold text-lg hover:bg-emerald-50 transition-colors text-center"
-                  >
-                    Learn More
-                  </Link>
-                </div>
-              </div>
-              <div className="relative h-96 hidden md:block">
-                <Image
-                  src="https://images.unsplash.com/photo-1576091160550-2173dba999ef?w=600&h=500&fit=crop"
-                  alt="Hospital"
-                  fill
-                  className="object-cover rounded-2xl"
-                  priority
-                />
-              </div>
-            </div>
-          </div>
-        </section>
+        <HeroSection />
 
-        {/* Features Section */}
-        <section className="py-20 bg-white">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <SectionHeading
-              title="Why Choose Us"
-              description="Excellence in healthcare services with a commitment to patient care"
-              centered
-            />
+        <HomeAboutSection />
 
-            <div className="grid md:grid-cols-4 gap-8">
-              {[
-                {
-                  icon: Stethoscope,
-                  title: "Expert Doctors",
-                  description: "Highly qualified and experienced medical professionals",
-                },
-                {
-                  icon: Heart,
-                  title: "Advanced Technology",
-                  description: "State-of-the-art medical equipment and diagnostic tools",
-                },
-                {
-                  icon: Clock,
-                  title: "24/7 Emergency",
-                  description: "Round-the-clock emergency and critical care services",
-                },
-                {
-                  icon: Users,
-                  title: "Patient Care",
-                  description: "Compassionate and personalized patient care approach",
-                },
-              ].map((feature, idx) => {
-                const Icon = feature.icon;
-                return (
-                  <div key={idx} className="text-center">
-                    <div className="bg-emerald-100 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4">
-                      <Icon className="w-8 h-8 text-emerald-600" />
-                    </div>
-                    <h3 className="text-xl font-semibold text-slate-900 mb-2">{feature.title}</h3>
-                    <p className="text-slate-600 text-sm">{feature.description}</p>
-                  </div>
-                );
-              })}
-            </div>
-          </div>
-        </section>
+        <HomeServicesSection />
 
         {/* Departments Section */}
-        <section className="py-20 bg-slate-50">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <SectionHeading
-              title="Our Departments"
-              subtitle="Medical Specializations"
-              description="Comprehensive healthcare services across multiple specializations"
-              centered
-            />
-
-            <div className="grid md:grid-cols-3 gap-8 mb-12">
-              {featuredDepartments.map((department) => (
-                <DepartmentCard key={department.id} department={department} />
-              ))}
-            </div>
-
+        <section className="w-full">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20">
             <div className="text-center">
-              <Link
-                href="/departments"
-                className="inline-block bg-emerald-500 text-white px-8 py-3 rounded-lg font-semibold hover:bg-emerald-600 transition-colors"
-              >
-                View All Departments
-              </Link>
+              <SectionHeading
+                title="Our Departments"
+                subtitle="Medical Professionals"
+                description="Explore our specialized departments and the services we offer."
+                centered
+              />
+            </div>
+            <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+              {departments.map((dept) => (
+                <DepartmentCard key={dept.id} department={dept} />
+              ))}
             </div>
           </div>
         </section>
@@ -137,7 +53,7 @@ export default function Home() {
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <SectionHeading
               title="Our Expert Doctors"
-              subtitle="Medical Professionals"
+              subtitle="Dedicated Medical Experts"
               description="Meet our team of highly qualified and experienced healthcare professionals"
               centered
             />
@@ -159,23 +75,9 @@ export default function Home() {
           </div>
         </section>
 
-        {/* CTA Section */}
-        <section className="bg-emerald-500 text-white py-16">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-            <h2 className="text-4xl font-bold mb-4">Ready to Book Your Appointment?</h2>
-            <p className="text-xl mb-8 text-emerald-50 max-w-2xl mx-auto">
-              Our healthcare professionals are ready to help you. Schedule your appointment today.
-            </p>
-            <Link
-              href="/appointment"
-              className="inline-block bg-white text-emerald-500 px-8 py-3 rounded-lg font-semibold hover:bg-emerald-50 transition-colors"
-            >
-              Book Now
-            </Link>
-          </div>
-        </section>
 
-        {/* Donation Section */}
+        <TestimonialsSection />
+ {/* Donation Section */}
         <section className="py-20 bg-gradient-to-r from-emerald-50 to-emerald-100">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <SectionHeading
@@ -246,6 +148,21 @@ export default function Home() {
                 </div>
               </div>
             </div>
+          </div>
+        </section>
+        {/* CTA Section */}
+        <section className="bg-emerald-500 text-white py-16">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+            <h2 className="text-4xl font-bold mb-4">Ready to Book Your Appointment?</h2>
+            <p className="text-xl mb-8 text-emerald-50 max-w-2xl mx-auto">
+              Our healthcare professionals are ready to help you. Schedule your appointment today.
+            </p>
+            <Link
+              href="/appointment"
+              className="inline-block bg-white text-emerald-500 px-8 py-3 rounded-lg font-semibold hover:bg-emerald-50 transition-colors"
+            >
+              Book Now
+            </Link>
           </div>
         </section>
 
