@@ -1,439 +1,437 @@
-// admin/appointments/page.tsx
-'use client';
+// "use client";
+
+// export const dynamic = "force-dynamic";
+
+// import { useState, useEffect } from "react";
+// import { useSearchParams } from "next/navigation";
+// import { Navbar } from "@/components/Navbar";
+// import { Footer } from "@/components/Footer";
+// import { doctors } from "@/data/doctors";
+// import { departments } from "@/data/departments";
+// import { CheckCircle } from "lucide-react";
+
+// export default function Appointment() {
+//   const searchParams = useSearchParams();
+
+//   const [step, setStep] = useState(1);
+//   const [formData, setFormData] = useState({
+//     patientName: "",
+//     patientPhone: "",
+//     disease: "",
+//   });
+
+//   const [selectedDepartment, setSelectedDepartment] = useState("");
+//   const [selectedDoctor, setSelectedDoctor] = useState("");
+//   const [selectedDate, setSelectedDate] = useState("");
+//   const [selectedTime, setSelectedTime] = useState("");
+//   const [submitted, setSubmitted] = useState(false);
+
+//   // ✅ Safe search param handling (client-side only)
+//   useEffect(() => {
+//     const doctorId = searchParams.get("doctor");
+
+//     if (doctorId) {
+//       setSelectedDoctor(doctorId);
+
+//       const doctor = doctors.find((d) => d.id === doctorId);
+//       if (doctor) {
+//         setSelectedDepartment(doctor.department);
+//         setStep(2);
+//       }
+//     }
+//   }, [searchParams]);
+
+//   const departmentOptions = departments.map((d) => ({
+//     id: d.id,
+//     name: d.name,
+//   }));
+
+//   const doctorOptions = selectedDepartment
+//     ? doctors.filter((d) => d.department === selectedDepartment)
+//     : [];
+
+//   const selectedDoctorObj = doctors.find((d) => d.id === selectedDoctor);
+//   const selectedDepartmentObj = departments.find(
+//     (d) => d.name === selectedDepartment
+//   );
+
+//   const handleNext = () => {
+//     if (step === 1 && selectedDepartment) setStep(2);
+//     else if (step === 2 && selectedDoctor) setStep(3);
+//     else if (step === 3 && selectedDate && selectedTime) setStep(4);
+//   };
+
+//   const handlePrev = () => {
+//     if (step > 1) setStep(step - 1);
+//   };
+
+//   const handleSubmit = (e: React.FormEvent) => {
+//     e.preventDefault();
+//     if (formData.patientName && formData.patientPhone && formData.disease) {
+//       console.log("Appointment booked:", {
+//         ...formData,
+//         selectedDepartment,
+//         selectedDoctor,
+//         selectedDate,
+//         selectedTime,
+//       });
+//       setSubmitted(true);
+//     }
+//   };
+
+//   if (submitted) {
+//     return (
+//       <>
+//         <Navbar />
+//         <main className="py-20 bg-slate-50 min-h-screen">
+//           <div className="max-w-2xl mx-auto px-4">
+//             <div className="bg-white rounded-2xl shadow-lg p-8 text-center">
+//               <CheckCircle className="w-16 h-16 text-emerald-500 mx-auto mb-6" />
+//               <h1 className="text-3xl font-bold mb-4">
+//                 Appointment Booked!
+//               </h1>
+//               <p className="text-slate-600 mb-6">
+//                 Thank you. Our team will confirm your appointment shortly.
+//               </p>
+
+//               <div className="bg-slate-50 p-6 rounded-lg text-left mb-6">
+//                 <p><strong>Name:</strong> {formData.patientName}</p>
+//                 <p><strong>Phone:</strong> {formData.patientPhone}</p>
+//                 <p><strong>Department:</strong> {selectedDepartmentObj?.name}</p>
+//                 <p><strong>Doctor:</strong> {selectedDoctorObj?.name}</p>
+//                 <p><strong>Date:</strong> {selectedDate}</p>
+//                 <p><strong>Time:</strong> {selectedTime}</p>
+//                 <p><strong>Complaint:</strong> {formData.disease}</p>
+//               </div>
+
+//               <button
+//                 onClick={() => (window.location.href = "/")}
+//                 className="bg-emerald-500 text-white px-6 py-3 rounded-lg"
+//               >
+//                 Back to Home
+//               </button>
+//             </div>
+//           </div>
+//         </main>
+//         <Footer />
+//       </>
+//     );
+//   }
+
+//   return (
+//     <>
+//       <Navbar />
+//       <main className="py-20 bg-white min-h-screen">
+//         <div className="max-w-2xl mx-auto px-4">
+
+//           <h1 className="text-4xl font-bold mb-10">
+//             Book Your Appointment
+//           </h1>
+
+//           {/* Step 1 */}
+//           {step === 1 && (
+//             <div className="space-y-4">
+//               <h2 className="font-semibold">Select Department</h2>
+//               {departmentOptions.map((dept) => (
+//                 <button
+//                   key={dept.id}
+//                   onClick={() => setSelectedDepartment(dept.name)}
+//                   className={`block w-full p-3 border rounded-lg ${
+//                     selectedDepartment === dept.name
+//                       ? "bg-emerald-100 border-emerald-500"
+//                       : "border-gray-300"
+//                   }`}
+//                 >
+//                   {dept.name}
+//                 </button>
+//               ))}
+//             </div>
+//           )}
+
+//           {/* Step 2 */}
+//           {step === 2 && (
+//             <div className="space-y-4">
+//               <h2 className="font-semibold">Select Doctor</h2>
+//               {doctorOptions.map((doc) => (
+//                 <button
+//                   key={doc.id}
+//                   onClick={() => setSelectedDoctor(doc.id)}
+//                   className={`block w-full p-3 border rounded-lg ${
+//                     selectedDoctor === doc.id
+//                       ? "bg-emerald-100 border-emerald-500"
+//                       : "border-gray-300"
+//                   }`}
+//                 >
+//                   {doc.name}
+//                 </button>
+//               ))}
+//             </div>
+//           )}
+
+//           {/* Step 3 */}
+//           {step === 3 && (
+//             <div className="space-y-4">
+//               <h2 className="font-semibold">Select Date & Time</h2>
+//               <input
+//                 type="date"
+//                 value={selectedDate}
+//                 onChange={(e) => setSelectedDate(e.target.value)}
+//                 className="w-full border p-3 rounded-lg"
+//               />
+//               <select
+//                 value={selectedTime}
+//                 onChange={(e) => setSelectedTime(e.target.value)}
+//                 className="w-full border p-3 rounded-lg"
+//               >
+//                 <option value="">Select Time</option>
+//                 <option value="09:00 AM">9:00 AM</option>
+//                 <option value="10:00 AM">10:00 AM</option>
+//               </select>
+//             </div>
+//           )}
+
+//           {/* Step 4 */}
+//           {step === 4 && (
+//             <form onSubmit={handleSubmit} className="space-y-4">
+//               <input
+//                 type="text"
+//                 placeholder="Full Name"
+//                 required
+//                 value={formData.patientName}
+//                 onChange={(e) =>
+//                   setFormData({ ...formData, patientName: e.target.value })
+//                 }
+//                 className="w-full border p-3 rounded-lg"
+//               />
+//               <input
+//                 type="tel"
+//                 placeholder="Phone"
+//                 required
+//                 value={formData.patientPhone}
+//                 onChange={(e) =>
+//                   setFormData({ ...formData, patientPhone: e.target.value })
+//                 }
+//                 className="w-full border p-3 rounded-lg"
+//               />
+//               <textarea
+//                 placeholder="Describe your issue"
+//                 required
+//                 value={formData.disease}
+//                 onChange={(e) =>
+//                   setFormData({ ...formData, disease: e.target.value })
+//                 }
+//                 className="w-full border p-3 rounded-lg"
+//               />
+
+//               <button
+//                 type="submit"
+//                 className="w-full bg-emerald-500 text-white py-3 rounded-lg"
+//               >
+//                 Confirm Appointment
+//               </button>
+//             </form>
+//           )}
+
+//           {/* Navigation */}
+//           {step < 4 && (
+//             <div className="flex gap-4 mt-6">
+//               {step > 1 && (
+//                 <button
+//                   onClick={handlePrev}
+//                   className="flex-1 border p-3 rounded-lg"
+//                 >
+//                   Previous
+//                 </button>
+//               )}
+//               <button
+//                 onClick={handleNext}
+//                 className="flex-1 bg-emerald-500 text-white p-3 rounded-lg"
+//               >
+//                 Next
+//               </button>
+//             </div>
+//           )}
+//         </div>
+//       </main>
+//       <Footer />
+//     </>
+//   );
+// }
+
+
+
+
+"use client";
 
 import { useState } from "react";
-import { mockAppointments } from "@/data/appointments";
-import { type Appointment } from "@/data/appointments";
-import { 
-  Eye, Edit2, Calendar, Clock, Search, Filter, 
-  ChevronDown, ChevronLeft, ChevronRight, X,
-  CheckCircle2, Clock as ClockIcon, XCircle,
-  User, Stethoscope, Activity, Download, Printer,
-  MoreHorizontal, CalendarDays, RefreshCw
-} from "lucide-react";
+import { Navbar } from "@/components/Navbar";
+import { Footer } from "@/components/Footer";
+import { doctors } from "@/data/doctors";
+import { departments } from "@/data/departments";
 
-// Status Badge Component
-function StatusBadge({ status }: { status: string }) {
-  const config = {
-    Approved: { icon: CheckCircle2, color: "bg-emerald-50 text-emerald-700 border-emerald-200", label: "Approved" },
-    Pending: { icon: ClockIcon, color: "bg-amber-50 text-amber-700 border-amber-200", label: "Pending" },
-    Cancelled: { icon: XCircle, color: "bg-red-50 text-red-700 border-red-200", label: "Cancelled" }
-  };
-  const { icon: Icon, color, label } = config[status as keyof typeof config] || config.Pending;
-  
-  return (
-    <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium border ${color}`}>
-      <Icon className="w-3 h-3" />
-      {label}
-    </span>
-  );
-}
-
-// Appointment Card Component for Mobile View
-function AppointmentCard({ 
-  appointment, 
-  onUpdate 
-}: { 
-  appointment: Appointment; 
-  onUpdate: (apt: Appointment) => void;
-}) {
-  return (
-    <div className="bg-white rounded-xl border border-slate-100 p-4 hover:shadow-md transition-all">
-      <div className="flex items-start justify-between mb-3">
-        <div className="flex items-center gap-3">
-          <div className="w-10 h-10 rounded-full bg-gradient-to-br from-blue-400 to-blue-600 flex items-center justify-center text-white font-bold text-sm">
-            {appointment.patientName.split(' ').map(n => n[0]).join('').slice(0, 2)}
-          </div>
-          <div>
-            <h3 className="font-semibold text-slate-900">{appointment.patientName}</h3>
-            <div className="flex items-center gap-2 mt-0.5">
-              <span className="text-xs text-slate-500">{appointment.doctor}</span>
-              <span className="text-xs text-slate-300">•</span>
-              <span className="text-xs text-slate-500">{appointment.department}</span>
-            </div>
-          </div>
-        </div>
-        <StatusBadge status={appointment.status} />
-      </div>
-      
-      <div className="flex items-center gap-4 text-xs text-slate-500 mb-4">
-        <div className="flex items-center gap-1">
-          <Calendar className="w-3.5 h-3.5" />
-          <span>{appointment.date}</span>
-        </div>
-        <div className="flex items-center gap-1">
-          <Clock className="w-3.5 h-3.5" />
-          <span>{appointment.time}</span>
-        </div>
-      </div>
-      
-      <button
-        onClick={() => onUpdate(appointment)}
-        className="w-full flex items-center justify-center gap-2 px-3 py-2 bg-slate-50 hover:bg-slate-100 rounded-lg text-sm font-medium text-slate-700 transition-colors"
-      >
-        <Edit2 className="w-3.5 h-3.5" />
-        Update Status
-      </button>
-    </div>
-  );
-}
-
-export default function AdminAppointments() {
-  const [appointments, setAppointments] = useState<Appointment[]>(mockAppointments);
-  const [statusFilter, setStatusFilter] = useState("All");
-  const [searchQuery, setSearchQuery] = useState("");
-  const [selectedAppointment, setSelectedAppointment] = useState<Appointment | null>(null);
-  const [currentPage, setCurrentPage] = useState(1);
-  const itemsPerPage = 10;
-
-  // Filter appointments
-  const filteredAppointments = appointments.filter((apt) => {
-    const matchesStatus = statusFilter === "All" || apt.status === statusFilter;
-    const matchesSearch = searchQuery === "" || 
-      apt.patientName.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      apt.doctor.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      apt.department.toLowerCase().includes(searchQuery.toLowerCase());
-    return matchesStatus && matchesSearch;
+export default function Appointment() {
+  const [formData, setFormData] = useState({
+    patientName: "",
+    patientPhone: "",
+    department: "",
+    doctor: "",
+    date: "",
+    time: "",
+    disease: "",
   });
 
-  // Pagination
-  const totalPages = Math.ceil(filteredAppointments.length / itemsPerPage);
-  const startIndex = (currentPage - 1) * itemsPerPage;
-  const paginatedAppointments = filteredAppointments.slice(startIndex, startIndex + itemsPerPage);
+  const [submitted, setSubmitted] = useState(false);
 
-  const handleStatusChange = (id: string, newStatus: "Pending" | "Approved" | "Cancelled") => {
-    setAppointments(
-      appointments.map((apt) => (apt.id === id ? { ...apt, status: newStatus } : apt))
+  const doctorOptions = doctors.filter(
+    (doc) => doc.department === formData.department
+  );
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    console.log("Appointment Data:", formData);
+    setSubmitted(true);
+  };
+
+  if (submitted) {
+    return (
+      <>
+        <Navbar />
+        <main className="py-20 bg-slate-50 min-h-screen flex items-center justify-center">
+          <div className="bg-white p-8 rounded-xl shadow-md text-center max-w-md w-full">
+            <h1 className="text-2xl font-bold text-green-600 mb-4">
+              Appointment Booked ✅
+            </h1>
+            <p className="text-slate-600 mb-6">
+              Thank you! We will contact you soon.
+            </p>
+            <button
+              onClick={() => setSubmitted(false)}
+              className="bg-green-600 text-white px-6 py-2 rounded-lg"
+            >
+              Book Another
+            </button>
+          </div>
+        </main>
+        <Footer />
+      </>
     );
-    setSelectedAppointment(null);
-  };
-
-  const stats = {
-    total: appointments.length,
-    approved: appointments.filter(a => a.status === "Approved").length,
-    pending: appointments.filter(a => a.status === "Pending").length,
-    cancelled: appointments.filter(a => a.status === "Cancelled").length,
-  };
+  }
 
   return (
-    <div className="min-h-screen bg-slate-50/50">
-      <div className="p-4 sm:p-6 space-y-6 max-w-7xl mx-auto">
-        {/* Header */}
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-          <div>
-            <h1 className="text-2xl font-bold text-slate-900">Appointments</h1>
-            <p className="text-sm text-slate-500 mt-1">Manage and track patient appointments</p>
-          </div>
-          <div className="flex items-center gap-2">
-            <button className="flex items-center gap-2 px-3 py-2 text-sm text-slate-600 hover:bg-white rounded-lg transition-colors border border-slate-200">
-              <Download className="w-4 h-4" />
-              Export
-            </button>
-            <button className="flex items-center gap-2 px-3 py-2 text-sm text-slate-600 hover:bg-white rounded-lg transition-colors border border-slate-200">
-              <Printer className="w-4 h-4" />
-              Print
-            </button>
-            <button className="flex items-center gap-2 px-3 py-2 bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium rounded-lg transition-colors">
-              <CalendarDays className="w-4 h-4" />
-              New Appointment
-            </button>
-          </div>
-        </div>
+    <>
+      <Navbar />
+      <main className="py-20 bg-white min-h-screen">
+        <div className="max-w-2xl mx-auto px-4">
+          <h1 className="text-4xl font-bold mb-10 text-center">
+            Book Appointment
+          </h1>
 
-        {/* Stats Cards */}
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-          <div className="bg-white rounded-xl border border-slate-100 p-4">
-            <div className="flex items-center justify-between mb-2">
-              <Calendar className="w-5 h-5 text-blue-500" />
-              <span className="text-2xl font-bold text-slate-900">{stats.total}</span>
-            </div>
-            <p className="text-sm text-slate-500">Total Appointments</p>
-          </div>
-          <div className="bg-white rounded-xl border border-slate-100 p-4">
-            <div className="flex items-center justify-between mb-2">
-              <CheckCircle2 className="w-5 h-5 text-emerald-500" />
-              <span className="text-2xl font-bold text-slate-900">{stats.approved}</span>
-            </div>
-            <p className="text-sm text-slate-500">Approved</p>
-          </div>
-          <div className="bg-white rounded-xl border border-slate-100 p-4">
-            <div className="flex items-center justify-between mb-2">
-              <ClockIcon className="w-5 h-5 text-amber-500" />
-              <span className="text-2xl font-bold text-slate-900">{stats.pending}</span>
-            </div>
-            <p className="text-sm text-slate-500">Pending</p>
-          </div>
-          <div className="bg-white rounded-xl border border-slate-100 p-4">
-            <div className="flex items-center justify-between mb-2">
-              <XCircle className="w-5 h-5 text-red-500" />
-              <span className="text-2xl font-bold text-slate-900">{stats.cancelled}</span>
-            </div>
-            <p className="text-sm text-slate-500">Cancelled</p>
-          </div>
-        </div>
+          <form onSubmit={handleSubmit} className="space-y-6">
 
-        {/* Filters */}
-        <div className="bg-white rounded-xl border border-slate-100 p-4">
-          <div className="flex flex-col sm:flex-row gap-3">
-            <div className="relative flex-1">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
-              <input
-                type="text"
-                placeholder="Search by patient, doctor, or department..."
-                value={searchQuery}
-                onChange={(e) => {
-                  setSearchQuery(e.target.value);
-                  setCurrentPage(1);
-                }}
-                className="w-full pl-9 pr-4 py-2 text-sm bg-slate-50 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-400"
-              />
-            </div>
-            <div className="flex gap-2 overflow-x-auto pb-1 sm:pb-0">
-              {["All", "Pending", "Approved", "Cancelled"].map((status) => (
-                <button
-                  key={status}
-                  onClick={() => {
-                    setStatusFilter(status);
-                    setCurrentPage(1);
-                  }}
-                  className={`px-4 py-2 rounded-lg font-medium text-sm transition-colors whitespace-nowrap ${
-                    statusFilter === status
-                      ? status === "Approved"
-                        ? "bg-emerald-500 text-white"
-                        : status === "Pending"
-                        ? "bg-amber-500 text-white"
-                        : status === "Cancelled"
-                        ? "bg-red-500 text-white"
-                        : "bg-blue-500 text-white"
-                      : "bg-slate-50 text-slate-600 hover:bg-slate-100 border border-slate-200"
-                  }`}
-                >
-                  {status}
-                </button>
-              ))}
-            </div>
-          </div>
-        </div>
-
-        {/* Desktop Table View */}
-        <div className="hidden lg:block bg-white rounded-xl border border-slate-100 overflow-hidden">
-          <div className="overflow-x-auto">
-            <table className="w-full">
-              <thead>
-                <tr className="bg-slate-50 border-b border-slate-200">
-                  <th className="px-6 py-4 text-left text-xs font-semibold text-slate-500 uppercase tracking-wider">
-                    Patient
-                  </th>
-                  <th className="px-6 py-4 text-left text-xs font-semibold text-slate-500 uppercase tracking-wider">
-                    Department
-                  </th>
-                  <th className="px-6 py-4 text-left text-xs font-semibold text-slate-500 uppercase tracking-wider">
-                    Doctor
-                  </th>
-                  <th className="px-6 py-4 text-left text-xs font-semibold text-slate-500 uppercase tracking-wider">
-                    Date & Time
-                  </th>
-                  <th className="px-6 py-4 text-left text-xs font-semibold text-slate-500 uppercase tracking-wider">
-                    Status
-                  </th>
-                  <th className="px-6 py-4 text-left text-xs font-semibold text-slate-500 uppercase tracking-wider">
-                    Actions
-                  </th>
-                </tr>
-              </thead>
-              <tbody>
-                {paginatedAppointments.map((apt) => (
-                  <tr key={apt.id} className="border-b border-slate-100 hover:bg-slate-50 transition-colors">
-                    <td className="px-6 py-4">
-                      <div className="flex items-center gap-3">
-                        <div className="w-8 h-8 rounded-full bg-gradient-to-br from-blue-400 to-blue-600 flex items-center justify-center text-white text-xs font-bold">
-                          {apt.patientName.split(' ').map(n => n[0]).join('').slice(0, 2)}
-                        </div>
-                        <span className="text-sm font-medium text-slate-900">{apt.patientName}</span>
-                      </div>
-                    </td>
-                    <td className="px-6 py-4 text-sm text-slate-600">{apt.department}</td>
-                    <td className="px-6 py-4 text-sm text-slate-600">{apt.doctor}</td>
-                    <td className="px-6 py-4">
-                      <div className="flex items-center gap-2 text-sm text-slate-600">
-                        <Calendar className="w-3.5 h-3.5 text-slate-400" />
-                        <span>{apt.date}</span>
-                        <Clock className="w-3.5 h-3.5 text-slate-400 ml-1" />
-                        <span>{apt.time}</span>
-                      </div>
-                    </td>
-                    <td className="px-6 py-4">
-                      <StatusBadge status={apt.status} />
-                    </td>
-                    <td className="px-6 py-4">
-                      <button
-                        onClick={() => setSelectedAppointment(apt)}
-                        className="flex items-center gap-1.5 px-3 py-1.5 text-sm text-blue-600 hover:bg-blue-50 rounded-lg transition-colors font-medium"
-                      >
-                        <Edit2 className="w-3.5 h-3.5" />
-                        Update
-                      </button>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        </div>
-
-        {/* Mobile Card View */}
-        <div className="lg:hidden space-y-3">
-          {paginatedAppointments.map((apt) => (
-            <AppointmentCard
-              key={apt.id}
-              appointment={apt}
-              onUpdate={setSelectedAppointment}
+            <input
+              type="text"
+              placeholder="Full Name"
+              required
+              value={formData.patientName}
+              onChange={(e) =>
+                setFormData({ ...formData, patientName: e.target.value })
+              }
+              className="w-full border p-3 rounded-lg"
             />
-          ))}
-        </div>
 
-        {/* Empty State */}
-        {filteredAppointments.length === 0 && (
-          <div className="bg-white rounded-xl border border-slate-100 p-12 text-center">
-            <Calendar className="w-12 h-12 text-slate-300 mx-auto mb-3" />
-            <p className="text-slate-500 text-lg font-medium">No appointments found</p>
-            <p className="text-sm text-slate-400 mt-1">Try adjusting your search or filter criteria</p>
-          </div>
-        )}
+            <input
+              type="tel"
+              placeholder="Phone Number"
+              required
+              value={formData.patientPhone}
+              onChange={(e) =>
+                setFormData({ ...formData, patientPhone: e.target.value })
+              }
+              className="w-full border p-3 rounded-lg"
+            />
 
-        {/* Pagination */}
-        {filteredAppointments.length > 0 && (
-          <div className="flex items-center justify-between bg-white rounded-xl border border-slate-100 px-4 py-3">
-            <p className="text-sm text-slate-500">
-              Showing <span className="font-medium">{startIndex + 1}</span> to{" "}
-              <span className="font-medium">
-                {Math.min(startIndex + itemsPerPage, filteredAppointments.length)}
-              </span>{" "}
-              of <span className="font-medium">{filteredAppointments.length}</span> results
-            </p>
-            <div className="flex gap-2">
-              <button
-                onClick={() => setCurrentPage(prev => Math.max(1, prev - 1))}
-                disabled={currentPage === 1}
-                className="p-2 text-slate-400 hover:text-slate-600 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-              >
-                <ChevronLeft className="w-5 h-5" />
-              </button>
-              <div className="flex gap-1">
-                {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
-                  let pageNum;
-                  if (totalPages <= 5) {
-                    pageNum = i + 1;
-                  } else if (currentPage <= 3) {
-                    pageNum = i + 1;
-                  } else if (currentPage >= totalPages - 2) {
-                    pageNum = totalPages - 4 + i;
-                  } else {
-                    pageNum = currentPage - 2 + i;
-                  }
-                  
-                  return (
-                    <button
-                      key={pageNum}
-                      onClick={() => setCurrentPage(pageNum)}
-                      className={`px-3 py-1 rounded-lg text-sm font-medium transition-colors ${
-                        currentPage === pageNum
-                          ? "bg-blue-600 text-white"
-                          : "text-slate-600 hover:bg-slate-100"
-                      }`}
-                    >
-                      {pageNum}
-                    </button>
-                  );
-                })}
-              </div>
-              <button
-                onClick={() => setCurrentPage(prev => Math.min(totalPages, prev + 1))}
-                disabled={currentPage === totalPages}
-                className="p-2 text-slate-400 hover:text-slate-600 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-              >
-                <ChevronRight className="w-5 h-5" />
-              </button>
-            </div>
-          </div>
-        )}
-      </div>
-
-      {/* Modal for updating status */}
-      {selectedAppointment && (
-        <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4" onClick={() => setSelectedAppointment(null)}>
-          <div className="bg-white rounded-2xl shadow-xl max-w-md w-full p-6" onClick={(e) => e.stopPropagation()}>
-            <div className="flex items-center justify-between mb-4">
-              <h2 className="text-xl font-bold text-slate-900">Update Appointment Status</h2>
-              <button
-                onClick={() => setSelectedAppointment(null)}
-                className="p-1 hover:bg-slate-100 rounded-lg transition-colors"
-              >
-                <X className="w-5 h-5 text-slate-400" />
-              </button>
-            </div>
-
-            <div className="bg-slate-50 rounded-xl p-4 mb-6">
-              <div className="flex items-center gap-3 mb-3">
-                <div className="w-10 h-10 rounded-full bg-gradient-to-br from-blue-400 to-blue-600 flex items-center justify-center text-white font-bold">
-                  {selectedAppointment.patientName.split(' ').map(n => n[0]).join('').slice(0, 2)}
-                </div>
-                <div>
-                  <p className="font-semibold text-slate-900">{selectedAppointment.patientName}</p>
-                  <p className="text-sm text-slate-500">{selectedAppointment.doctor}</p>
-                </div>
-              </div>
-              <div className="flex items-center gap-4 text-sm text-slate-600">
-                <div className="flex items-center gap-1">
-                  <Calendar className="w-3.5 h-3.5" />
-                  <span>{selectedAppointment.date}</span>
-                </div>
-                <div className="flex items-center gap-1">
-                  <Clock className="w-3.5 h-3.5" />
-                  <span>{selectedAppointment.time}</span>
-                </div>
-              </div>
-              <div className="mt-2">
-                <span className="text-sm text-slate-500">Department:</span>
-                <span className="text-sm text-slate-700 ml-2">{selectedAppointment.department}</span>
-              </div>
-            </div>
-
-            <div className="space-y-2 mb-6">
-              <p className="text-sm font-medium text-slate-700 mb-2">Select new status:</p>
-              {["Pending", "Approved", "Cancelled"].map((status) => (
-                <button
-                  key={status}
-                  onClick={() =>
-                    handleStatusChange(
-                      selectedAppointment.id,
-                      status as "Pending" | "Approved" | "Cancelled"
-                    )
-                  }
-                  className={`w-full px-4 py-3 rounded-lg font-medium text-sm transition-all ${
-                    selectedAppointment.status === status
-                      ? status === "Approved"
-                        ? "bg-emerald-500 text-white"
-                        : status === "Pending"
-                        ? "bg-amber-500 text-white"
-                        : "bg-red-500 text-white"
-                      : "bg-slate-100 text-slate-700 hover:bg-slate-200"
-                  }`}
-                >
-                  {status}
-                </button>
+            <select
+              required
+              value={formData.department}
+              onChange={(e) =>
+                setFormData({
+                  ...formData,
+                  department: e.target.value,
+                  doctor: "",
+                })
+              }
+              className="w-full border p-3 rounded-lg"
+            >
+              <option value="">Select Department</option>
+              {departments.map((dept) => (
+                <option key={dept.id} value={dept.name}>
+                  {dept.name}
+                </option>
               ))}
-            </div>
+            </select>
+
+            <select
+              required
+              value={formData.doctor}
+              onChange={(e) =>
+                setFormData({ ...formData, doctor: e.target.value })
+              }
+              className="w-full border p-3 rounded-lg"
+            >
+              <option value="">Select Doctor</option>
+              {doctorOptions.map((doc) => (
+                <option key={doc.id} value={doc.name}>
+                  {doc.name}
+                </option>
+              ))}
+            </select>
+
+            <input
+              type="date"
+              required
+              value={formData.date}
+              onChange={(e) =>
+                setFormData({ ...formData, date: e.target.value })
+              }
+              className="w-full border p-3 rounded-lg"
+            />
+
+            <select
+              required
+              value={formData.time}
+              onChange={(e) =>
+                setFormData({ ...formData, time: e.target.value })
+              }
+              className="w-full border p-3 rounded-lg"
+            >
+              <option value="">Select Time</option>
+              <option value="09:00 AM">09:00 AM</option>
+              <option value="10:00 AM">10:00 AM</option>
+              <option value="11:00 AM">11:00 AM</option>
+              <option value="02:00 PM">02:00 PM</option>
+              <option value="03:00 PM">03:00 PM</option>
+            </select>
+
+            <textarea
+              placeholder="Describe your issue"
+              required
+              value={formData.disease}
+              onChange={(e) =>
+                setFormData({ ...formData, disease: e.target.value })
+              }
+              className="w-full border p-3 rounded-lg"
+            />
 
             <button
-              onClick={() => setSelectedAppointment(null)}
-              className="w-full bg-slate-100 text-slate-700 px-4 py-3 rounded-lg font-medium hover:bg-slate-200 transition-colors"
+              type="submit"
+              className="w-full bg-green-600 text-white py-3 rounded-lg font-semibold"
             >
-              Close
+              Confirm Appointment
             </button>
-          </div>
+          </form>
         </div>
-      )}
-    </div>
+      </main>
+      <Footer />
+    </>
   );
 }
