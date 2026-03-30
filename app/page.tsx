@@ -166,24 +166,7 @@ export default function Home() {
           </div>
         </section>
 
-        {/* Stats Section */}
-        <section className="py-20 bg-slate-900 text-white">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div className="grid md:grid-cols-4 gap-8">
-              {[
-                { number: "50+", label: "Expert Doctors" },
-                { number: "10+", label: "Departments" },
-                { number: "500+", label: "Beds" },
-                { number: "24/7", label: "Emergency Care" },
-              ].map((stat, idx) => (
-                <div key={idx} className="text-center">
-                  <p className="text-5xl font-bold text-emerald-400 mb-2">{stat.number}</p>
-                  <p className="text-slate-300 text-lg">{stat.label}</p>
-                </div>
-              ))}
-            </div>
-          </div>
-        </section>
+
       </main>
       <Footer />
     </>

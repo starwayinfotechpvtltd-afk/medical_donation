@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { Facebook, Twitter, Instagram, Linkedin, Phone, Mail, MapPin } from "lucide-react";
+import { Facebook, Twitter, Instagram, Linkedin, Phone, Mail, MapPin, User, Stethoscope, Microscope, Heart, Shield } from "lucide-react";
 import { hospitalInfo } from "@/data/hospital";
 
 export function Footer() {
@@ -134,6 +134,48 @@ export function Footer() {
                 </p>
               </div>
             </div>
+          </div>
+        </div>
+
+        {/* Login Portals Section */}
+        <div className="border-t border-slate-700 pt-8 mb-8">
+          <h4 className="text-white font-semibold mb-4 text-center">Login Portals</h4>
+          <div className="grid grid-cols-2 md:grid-cols-5 gap-3">
+            <Link
+              href="/patient/login"
+              className="flex items-center justify-center gap-2 bg-slate-800 hover:bg-slate-700 text-slate-200 px-4 py-2 rounded-lg transition-colors group"
+            >
+              <User className="w-4 h-4 text-emerald-400 group-hover:text-emerald-300" />
+              <span className="text-sm font-medium">Patient Login</span>
+            </Link>
+            <Link
+              href="/doctor/login"
+              className="flex items-center justify-center gap-2 bg-slate-800 hover:bg-slate-700 text-slate-200 px-4 py-2 rounded-lg transition-colors group"
+            >
+              <Stethoscope className="w-4 h-4 text-blue-400 group-hover:text-blue-300" />
+              <span className="text-sm font-medium">Doctor Login</span>
+            </Link>
+            <Link
+              href="/labtech/login"
+              className="flex items-center justify-center gap-2 bg-slate-800 hover:bg-slate-700 text-slate-200 px-4 py-2 rounded-lg transition-colors group"
+            >
+              <Microscope className="w-4 h-4 text-purple-400 group-hover:text-purple-300" />
+              <span className="text-sm font-medium">Lab Login</span>
+            </Link>
+            <Link
+              href="/nurse/login"
+              className="flex items-center justify-center gap-2 bg-slate-800 hover:bg-slate-700 text-slate-200 px-4 py-2 rounded-lg transition-colors group"
+            >
+              <Heart className="w-4 h-4 text-pink-400 group-hover:text-pink-300" />
+              <span className="text-sm font-medium">Nurse Login</span>
+            </Link>
+            <Link
+              href="/admin/login"
+              className="flex items-center justify-center gap-2 bg-slate-800 hover:bg-slate-700 text-slate-200 px-4 py-2 rounded-lg transition-colors group"
+            >
+              <Shield className="w-4 h-4 text-slate-400 group-hover:text-slate-300" />
+              <span className="text-sm font-medium">Admin Login</span>
+            </Link>
           </div>
         </div>
 
