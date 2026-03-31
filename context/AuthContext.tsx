@@ -50,6 +50,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       return false;
     }
 
+
+
+
+
     let newUser: User;
 
     switch (role) {

@@ -17,19 +17,19 @@ export function Navbar() {
   useEffect(() => {
     const handleScroll = () => {
       const currentScrollY = window.scrollY;
-      
+
       // Hide top bar when scrolling down, show when scrolling up
       if (currentScrollY > lastScrollY && currentScrollY > 50) {
         setShowTopBar(false);
       } else if (currentScrollY < lastScrollY) {
         setShowTopBar(true);
       }
-      
+
       setLastScrollY(currentScrollY);
     };
 
     window.addEventListener("scroll", handleScroll, { passive: true });
-    
+
     return () => {
       window.removeEventListener("scroll", handleScroll);
     };
@@ -46,11 +46,11 @@ export function Navbar() {
 
   // Announcement messages for marquee
   const announcements = [
-    "🏥 Free Health Check-up Camp on March 25th, 2026 - Register Now!",
-    "💊 20% Discount on All Lab Tests - Limited Period Offer",
-    "👨‍⚕️ New Cardiology Department Now Open - Book Your Appointment Today",
-    "🩺 Annual Health Check-up Package at Just ₹999 - Call Now!",
-    "🌟 Special OPD Hours Extended till 8 PM for Working Professionals",
+    "Free Health Check-up Camp on March 25th, 2026 - Register Now!",
+    "20% Discount on All Lab Tests - Limited Period Offer",
+    "New Cardiology Department Now Open - Book Your Appointment Today",
+    "Annual Health Check-up Package at Just ₹999 - Call Now!",
+    "Special OPD Hours Extended till 8 PM for Working Professionals",
   ];
 
   return (
@@ -79,7 +79,7 @@ export function Navbar() {
               ))}
             </div>
           </div>
-          
+
           {/* Optional: Close button for top bar */}
           <button
             onClick={() => setShowTopBar(false)}
@@ -96,7 +96,7 @@ export function Navbar() {
         <div className="max-w-7xl mx-auto py-2">
           <div className="flex justify-between items-center h-16">
             {/* Logo */}
-            <Link href="/" className="flex items-center gap-4">
+            <Link href="/" className="flex items-center gap-2">
               <Image
                 src="/mefigurelogo.png"
                 alt="Mefigure Siddhi Vadanta"
@@ -106,12 +106,17 @@ export function Navbar() {
                 className="object-contain"
               />
 
-              <div className="hidden sm:flex flex-col">
-                <span className="text-gray-900 font-semibold text-base">
-                  Medical Care
-                </span>
-                <span className="text-emerald-600 text-xs font-medium tracking-wide">
-                  Hospital Services
+              <div className="hidden sm:flex flex-row gap-1">
+                <div className="flex gap-1">
+                  <span className="text-emerald-600 font-medium text-base 2xl:text-xl">
+                    Mefigure
+                  </span>
+                  <span className="text-orange-500 font-medium text-base 2xl:text-xl">
+                    siddhi
+                  </span>
+                </div>
+                <span className="text-blue-900 text-base 2xl:text-xl font-medium tracking-wide">
+                  Vadanta
                 </span>
               </div>
             </Link>
@@ -167,7 +172,7 @@ export function Navbar() {
                     {link.label}
                   </Link>
                 ))}
-                
+
                 {/* Book Appointment Button for Mobile */}
                 <Link
                   href="/appointment"
@@ -193,7 +198,7 @@ export function Navbar() {
         </div>
 
         {/* Donation Modal */}
-        <DonationModal  
+        <DonationModal
           isOpen={isDonationOpen}
           onClose={() => setIsDonationOpen(false)}
         />

@@ -149,14 +149,14 @@ export function Footer() {
               <span className="text-sm font-medium">Patient Login</span>
             </Link>
             <Link
-              href="/doctor/login"
+              href="/doctorLogin"
               className="flex items-center justify-center gap-2 bg-slate-800 hover:bg-slate-700 text-slate-200 px-4 py-2 rounded-lg transition-colors group"
             >
               <Stethoscope className="w-4 h-4 text-blue-400 group-hover:text-blue-300" />
               <span className="text-sm font-medium">Doctor Login</span>
             </Link>
             <Link
-              href="/labtech/login"
+              href="/labtechLogin"
               className="flex items-center justify-center gap-2 bg-slate-800 hover:bg-slate-700 text-slate-200 px-4 py-2 rounded-lg transition-colors group"
             >
               <Microscope className="w-4 h-4 text-purple-400 group-hover:text-purple-300" />
@@ -170,7 +170,7 @@ export function Footer() {
               <span className="text-sm font-medium">Nurse Login</span>
             </Link>
             <Link
-              href="/admin/login"
+              href="/adminLogin"
               className="flex items-center justify-center gap-2 bg-slate-800 hover:bg-slate-700 text-slate-200 px-4 py-2 rounded-lg transition-colors group"
             >
               <Shield className="w-4 h-4 text-slate-400 group-hover:text-slate-300" />

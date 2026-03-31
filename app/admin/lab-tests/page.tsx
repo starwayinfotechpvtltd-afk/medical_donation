@@ -451,7 +451,6 @@ function TestModal({ isOpen, onClose, onSubmit, initialData }: {
       status: "pending",
     });
   };
-  
   return (
     <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4" onClick={onClose}>
       <div className="bg-white rounded-2xl shadow-xl max-w-2xl w-full max-h-[90vh] overflow-y-auto" onClick={(e) => e.stopPropagation()}>

@@ -7,10 +7,9 @@ export default function DoctorLoginLayout({
   children: React.ReactNode;
 }) {
   return (
-    <>
-      <Navbar />
+    <><Navbar/>
       {children}
-      <Footer />
+      <Footer/>
     </>
   );
 }

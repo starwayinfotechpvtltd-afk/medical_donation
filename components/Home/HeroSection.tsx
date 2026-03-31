@@ -1,8 +1,17 @@
+"use client";
+
 import Image from "next/image";
-import React from "react";
 import { PhoneCall, ShieldCheck, Stethoscope, HeartPulse, HeartPlus, ClockPlus } from "lucide-react";
+import { Swiper, SwiperSlide } from "swiper/react";
+import { Autoplay, Pagination } from "swiper/modules";
 
 export default function HeroSection() {
+
+    const slides = [
+    "/images/home/hero_image_2.webp",
+    "/images/home/hero_image_3.jpg",
+    "/images/home/hero_image_4.png",
+  ];
   return (
     <section className="w-full bg-gradient-to-b from-green-50 via-white to-white">
       {/* Hero Content */}
@@ -64,36 +73,6 @@ export default function HeroSection() {
                 Call Now
               </button>
             </div>
-
-            {/* Doctor Avatars + Rating */}
-            {/* <div className="mt-8 flex items-center gap-5">
-              <div className="flex -space-x-3">
-                <img
-                  src="https://randomuser.me/api/portraits/men/32.jpg"
-                  className="w-10 h-10 rounded-full border-2 border-white object-cover"
-                  alt="doctor"
-                />
-                <img
-                  src="https://randomuser.me/api/portraits/women/44.jpg"
-                  className="w-10 h-10 rounded-full border-2 border-white object-cover"
-                  alt="doctor"
-                />
-                <img
-                  src="https://randomuser.me/api/portraits/men/52.jpg"
-                  className="w-10 h-10 rounded-full border-2 border-white object-cover"
-                  alt="doctor"
-                />
-              </div>
-
-              <div>
-                <p className="text-gray-900 font-bold text-sm">
-                  Our Expert Doctors
-                </p>
-                <p className="text-gray-500 text-xs">
-                  ⭐ 4.9 Rating from 2,500+ Reviews
-                </p>
-              </div>
-            </div> */}
           </div>
 
           {/* Right Side Badge */}
@@ -168,7 +147,7 @@ export default function HeroSection() {
         </div>
 
         {/* Hero Image Banner */}
-        <div className="max-w-[80%] mx-auto mt-12 rounded-3xl overflow-hidden shadow-xl border border-gray-200 relative w-full h-[260px] md:h-[340px] lg:h-[400px]">
+        {/* <div className="max-w-[80%] mx-auto mt-12 rounded-3xl overflow-hidden shadow-xl border border-gray-200 relative w-full h-[260px] md:h-[340px] lg:h-[400px]">
           <Image
             src="/images/home/hero_image_2.webp"
             alt="Healthcare Banner"
@@ -176,7 +155,33 @@ export default function HeroSection() {
             className="object-cover"
             priority
           />
-        </div>
+        </div> */}
+
+        <div className="max-w-[75%] mx-auto mt-12 rounded-3xl overflow-hidden border-2 border-green-500 relative w-full h-[260px] md:h-[340px] lg:h-[400px]">
+      
+      <Swiper
+        modules={[Autoplay, Pagination]}
+        autoplay={{ delay: 3000, disableOnInteraction: false }}
+        loop={true}
+        pagination={{ clickable: true }}
+        className="w-full h-full"
+      >
+        {slides.map((img, index) => (
+          <SwiperSlide key={index}>
+            <div className="relative w-full h-full">
+              <Image
+                src={img}
+                alt={`Healthcare Banner ${index}`}
+                fill
+                className="object-cover"
+                priority={index === 0}
+              />
+            </div>
+          </SwiperSlide>
+        ))}
+      </Swiper>
+
+    </div>
       </div>
     </section>
   );

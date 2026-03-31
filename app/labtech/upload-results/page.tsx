@@ -37,6 +37,11 @@ export default function UploadResultsPage() {
           <p className="text-slate-600">Submit completed laboratory test results</p>
         </div>
 
+        <div>
+          <h1 className="text-4xl font-medium">Upload Testing formet</h1>
+          <p className='text-accent font'></p>
+        </div>
+
         {/* Test Selection */}
         <div className="bg-white rounded-xl shadow-sm p-6 mb-6">
           <label className="block text-sm font-semibold text-slate-900 mb-3">Select Test</label>
