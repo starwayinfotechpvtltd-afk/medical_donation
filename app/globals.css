@@ -126,3 +126,36 @@
     @apply bg-background text-foreground;
   }
 }
+
+
+
+@keyframes marquee {
+  0% {
+    transform: translateX(0%);
+  }
+  100% {
+    transform: translateX(-50%);
+  }
+}
+
+.marquee-track {
+  display: flex;
+  width: max-content;
+  animation: marquee 25s linear infinite;
+}
+
+.marquee-container:hover .marquee-track {
+  animation-play-state: paused;
+}
+
+/* Smooth GPU acceleration */
+.marquee-track {
+  will-change: transform;
+}
+
+/* Mobile speed adjustment */
+@media (max-width: 768px) {
+  .marquee-track {
+    animation-duration: 18s;
+  }
+}

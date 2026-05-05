@@ -1,8 +1,22 @@
 "use client";
 
 import Link from "next/link";
-import { Facebook, Twitter, Instagram, Linkedin, Phone, Mail, MapPin, User, Stethoscope, Microscope, Heart, Shield } from "lucide-react";
+import {
+  Facebook,
+  Twitter,
+  Instagram,
+  Linkedin,
+  Phone,
+  Mail,
+  MapPin,
+  User,
+  Stethoscope,
+  Microscope,
+  Heart,
+  Shield,
+} from "lucide-react";
 import { hospitalInfo } from "@/data/hospital";
+import Image from "next/image";
 
 export function Footer() {
   const currentYear = new Date().getFullYear();
@@ -14,18 +28,33 @@ export function Footer() {
         <div className="grid grid-cols-1 md:grid-cols-4 gap-8 mb-8">
           {/* Brand Section */}
           <div>
-            <Link href="/" className="flex items-center gap-2 mb-4">
-              <div className="w-10 h-10 bg-emerald-500 rounded-lg flex items-center justify-center text-white font-bold">
-                M
-              </div>
-              <div>
-                <h3 className="text-white font-bold text-lg">Medical Care</h3>
-                <p className="text-emerald-400 text-xs font-semibold">Hospital</p>
+             <Link href="/" className="flex items-center gap-2">
+              <Image
+                src="/mefigurelogo.png"
+                alt="Mefigure Siddhi Vadanta"
+                width={55}
+                height={55}
+                priority
+                className="object-contain"
+              />
+
+              <div className="hidden sm:flex flex-row gap-1">
+                <div className="flex gap-1">
+                  <span className="text-emerald-600 font-medium text-base 2xl:text-lg">
+                    Mefigure
+                  </span>
+                  <span className="text-orange-500 font-medium text-base 2xl:text-lg">
+                    siddhi
+                  </span>
+                </div>
+                <span className="text-blue-900 text-base 2xl:text-xl font-medium tracking-wide">
+                  Vadanta
+                </span>
               </div>
             </Link>
             <p className="text-sm text-slate-400 leading-relaxed">
-              Providing compassionate, high-quality healthcare services with the latest medical
-              technology.
+              Providing compassionate, high-quality healthcare services with the
+              latest medical technology.
             </p>
           </div>
 
@@ -34,7 +63,10 @@ export function Footer() {
             <h4 className="text-white font-semibold mb-4">Quick Links</h4>
             <ul className="space-y-2">
               <li>
-                <Link href="/" className="text-slate-400 hover:text-emerald-400 text-sm transition">
+                <Link
+                  href="/"
+                  className="text-slate-400 hover:text-emerald-400 text-sm transition"
+                >
                   Home
                 </Link>
               </li>
@@ -119,14 +151,18 @@ export function Footer() {
               <div className="flex gap-3">
                 <Phone className="w-5 h-5 text-emerald-400 flex-shrink-0 mt-1" />
                 <div>
-                  <p className="text-slate-400 text-sm">{hospitalInfo.contact.phone}</p>
-                  <p className="text-emerald-400 text-xs">Emergency: {hospitalInfo.contact.emergencyPhone}</p>
+                  <p className="text-slate-400 text-sm">
+                    {hospitalInfo.contact.phone}
+                  </p>
+                  <p className="text-emerald-400 text-xs">
+                    Emergency: {hospitalInfo.contact.emergencyPhone}
+                  </p>
                 </div>
               </div>
-              <div className="flex gap-3">
+              {/* <div className="flex gap-3">
                 <Mail className="w-5 h-5 text-emerald-400 flex-shrink-0 mt-1" />
                 <p className="text-slate-400 text-sm">{hospitalInfo.contact.email}</p>
-              </div>
+              </div> */}
               <div className="flex gap-3">
                 <MapPin className="w-5 h-5 text-emerald-400 flex-shrink-0 mt-1" />
                 <p className="text-slate-400 text-sm">
@@ -139,7 +175,9 @@ export function Footer() {
 
         {/* Login Portals Section */}
         <div className="border-t border-slate-700 pt-8 mb-8">
-          <h4 className="text-white font-semibold mb-4 text-center">Login Portals</h4>
+          <h4 className="text-white font-semibold mb-4 text-center">
+            Login Portals
+          </h4>
           <div className="grid grid-cols-2 md:grid-cols-5 gap-3">
             <Link
               href="/patient/login"
@@ -219,9 +257,21 @@ export function Footer() {
               <Linkedin className="w-5 h-5" />
             </a>
           </div>
-
+          <div>
+            <p className="text-slate-400 text-sm text-center sm:text-left">
+              Designed by{" "}
+              <a
+                href="https://starwaywebdigital.com"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-emerald-400 font-medium hover:underline"
+              >
+                Starway
+              </a>
+            </p>{" "}
+          </div>
           <p className="text-slate-400 text-sm text-center sm:text-right">
-            Copyright © {currentYear} Advanced Medical Care Hospital. All rights reserved.
+            Copyright © {currentYear}. All rights reserved.
           </p>
         </div>
       </div>

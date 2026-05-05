@@ -20,7 +20,7 @@ export default function PatientLayout({
   return (
     <PatientProtected>
       <div className="flex">
-        <PatientSidebar />
+
         <main className="flex-1 bg-gray-50">
           {children}
         </main>

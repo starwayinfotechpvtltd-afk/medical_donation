@@ -440,6 +440,7 @@ function TemplateModal({ template, isOpen, onClose, onSave }: any) {
               Cancel
             </button>
           </div>
+          
         </form>
       </div>
     </div>

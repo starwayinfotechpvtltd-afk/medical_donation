@@ -4,6 +4,7 @@ import { Heart } from "lucide-react";
 import Image from "next/image";
 import { Swiper, SwiperSlide } from "swiper/react";
 import { Autoplay, Pagination } from "swiper/modules";
+import Link from "next/link";
 export default function DonationSection() {
   const slides = [
     "/images/home/hero_image_2.webp",
@@ -77,9 +78,11 @@ export default function DonationSection() {
                 need it most.
               </p>
 
-              <button className="bg-emerald-500 hover:bg-emerald-600 px-6 py-2 rounded-lg font-semibold transition">
-                Donate Now
-              </button>
+              <Link href="/donate">
+                <button className="bg-emerald-500 hover:bg-emerald-600 px-6 py-2 rounded-lg font-semibold transition">
+                  Donate Now
+                </button>
+              </Link>
             </div>
           </div>
         </div>

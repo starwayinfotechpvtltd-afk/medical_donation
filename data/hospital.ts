@@ -19,18 +19,18 @@ export const hospitalInfo = {
   directorName: "Dr. Priya Kapoor",
   
   address: {
-    street: "123 Medical Plaza, Healthcare District",
-    city: "New Delhi",
-    state: "Delhi",
-    pincode: "110001",
+    street: "H NO 32, VILLAGE GARHI NAWABAD",
+    city: "Grahi Noabad, Budhana, Muzaffarnagar",
+    state: "Uttar Pradesh",
+    pincode: "251309",
     country: "India",
   },
   
   contact: {
-    phone: "+91-11-4567-8900",
-    emergencyPhone: "+91-11-4567-8911",
-    email: "info@advancedmedicalcare.com",
-    emergencyEmail: "emergency@advancedmedicalcare.com",
+    phone: "+91-8899700966",
+    emergencyPhone: "+91-8899700966",
+    email: "mefigureceleb@gmail.com",
+    emergencyEmail: "mefigureceleb@gmail.com",
   },
   
   coordinates: {
