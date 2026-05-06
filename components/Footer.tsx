@@ -28,7 +28,7 @@ export function Footer() {
         <div className="grid grid-cols-1 md:grid-cols-4 gap-8 mb-8">
           {/* Brand Section */}
           <div>
-             <Link href="/" className="flex items-center gap-2">
+            <Link href="/" className="flex items-center gap-2">
               <Image
                 src="/mefigurelogo.png"
                 alt="Mefigure Siddhi Vadanta"
@@ -38,7 +38,7 @@ export function Footer() {
                 className="object-contain"
               />
 
-              <div className="hidden sm:flex flex-row gap-1">
+              <div className="hidden md:flex flex-row gap-1">
                 <div className="flex gap-1">
                   <span className="text-emerald-600 font-medium text-base 2xl:text-lg">
                     Mefigure
@@ -172,93 +172,78 @@ export function Footer() {
             </div>
           </div>
         </div>
+        <div className="border-t border-slate-700 mt-2 pt-3">
+          {/* Top Row */}
+          <div className="flex flex-col lg:flex-row items-center justify-between gap-6">
+            {/* Legal Links */}
+            <div className="flex flex-wrap items-center justify-center gap-3 text-sm">
+              <Link
+                href="/terms"
+                className="text-slate-400 hover:text-emerald-400 transition-colors"
+              >
+                Terms & Conditions
+              </Link>
 
-        {/* Login Portals Section */}
-        <div className="border-t border-slate-700 pt-8 mb-8">
-          <h4 className="text-white font-semibold mb-4 text-center">
-            Login Portals
-          </h4>
-          <div className="grid grid-cols-2 md:grid-cols-5 gap-3">
-            <Link
-              href="/patient/login"
-              className="flex items-center justify-center gap-2 bg-slate-800 hover:bg-slate-700 text-slate-200 px-4 py-2 rounded-lg transition-colors group"
-            >
-              <User className="w-4 h-4 text-emerald-400 group-hover:text-emerald-300" />
-              <span className="text-sm font-medium">Patient Login</span>
-            </Link>
-            <Link
-              href="/doctorLogin"
-              className="flex items-center justify-center gap-2 bg-slate-800 hover:bg-slate-700 text-slate-200 px-4 py-2 rounded-lg transition-colors group"
-            >
-              <Stethoscope className="w-4 h-4 text-blue-400 group-hover:text-blue-300" />
-              <span className="text-sm font-medium">Doctor Login</span>
-            </Link>
-            <Link
-              href="/labtechLogin"
-              className="flex items-center justify-center gap-2 bg-slate-800 hover:bg-slate-700 text-slate-200 px-4 py-2 rounded-lg transition-colors group"
-            >
-              <Microscope className="w-4 h-4 text-purple-400 group-hover:text-purple-300" />
-              <span className="text-sm font-medium">Lab Login</span>
-            </Link>
-            <Link
-              href="/nurse/login"
-              className="flex items-center justify-center gap-2 bg-slate-800 hover:bg-slate-700 text-slate-200 px-4 py-2 rounded-lg transition-colors group"
-            >
-              <Heart className="w-4 h-4 text-pink-400 group-hover:text-pink-300" />
-              <span className="text-sm font-medium">Nurse Login</span>
-            </Link>
-            <Link
-              href="/adminLogin"
-              className="flex items-center justify-center gap-2 bg-slate-800 hover:bg-slate-700 text-slate-200 px-4 py-2 rounded-lg transition-colors group"
-            >
-              <Shield className="w-4 h-4 text-slate-400 group-hover:text-slate-300" />
-              <span className="text-sm font-medium">Admin Login</span>
-            </Link>
-          </div>
-        </div>
+              <span className="text-slate-600">•</span>
 
-        {/* Social Links */}
-        <div className="border-t border-slate-700 pt-8 flex flex-col sm:flex-row justify-between items-center">
-          <div className="flex gap-4 mb-4 sm:mb-0">
-            <a
-              href={hospitalInfo.socialMedia.facebook}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="text-slate-400 hover:text-emerald-400 transition"
-              aria-label="Facebook"
-            >
-              <Facebook className="w-5 h-5" />
-            </a>
-            <a
-              href={hospitalInfo.socialMedia.twitter}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="text-slate-400 hover:text-emerald-400 transition"
-              aria-label="Twitter"
-            >
-              <Twitter className="w-5 h-5" />
-            </a>
-            <a
-              href={hospitalInfo.socialMedia.instagram}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="text-slate-400 hover:text-emerald-400 transition"
-              aria-label="Instagram"
-            >
-              <Instagram className="w-5 h-5" />
-            </a>
-            <a
-              href={hospitalInfo.socialMedia.linkedin}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="text-slate-400 hover:text-emerald-400 transition"
-              aria-label="LinkedIn"
-            >
-              <Linkedin className="w-5 h-5" />
-            </a>
+              <Link
+                href="/privacy
+                "
+                className="text-slate-400 hover:text-emerald-400 transition-colors"
+              >
+                Privacy Policy
+              </Link>
+            </div>
+            {/* Social Icons */}
+            <div className="flex items-center gap-4">
+              <a
+                href={hospitalInfo.socialMedia.facebook}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="w-9 h-9 rounded-full border border-slate-700 flex items-center justify-center text-slate-400 hover:text-emerald-400 hover:border-emerald-400 transition-all"
+                aria-label="Facebook"
+              >
+                <Facebook className="w-4 h-4" />
+              </a>
+
+              <a
+                href={hospitalInfo.socialMedia.twitter}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="w-9 h-9 rounded-full border border-slate-700 flex items-center justify-center text-slate-400 hover:text-emerald-400 hover:border-emerald-400 transition-all"
+                aria-label="Twitter"
+              >
+                <Twitter className="w-4 h-4" />
+              </a>
+
+              <a
+                href={hospitalInfo.socialMedia.instagram}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="w-9 h-9 rounded-full border border-slate-700 flex items-center justify-center text-slate-400 hover:text-emerald-400 hover:border-emerald-400 transition-all"
+                aria-label="Instagram"
+              >
+                <Instagram className="w-4 h-4" />
+              </a>
+
+              <a
+                href={hospitalInfo.socialMedia.linkedin}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="w-9 h-9 rounded-full border border-slate-700 flex items-center justify-center text-slate-400 hover:text-emerald-400 hover:border-emerald-400 transition-all"
+                aria-label="LinkedIn"
+              >
+                <Linkedin className="w-4 h-4" />
+              </a>
+            </div>
           </div>
-          <div>
-            <p className="text-slate-400 text-sm text-center sm:text-left">
+          {/* Bottom Row */}
+          <div className="mt-6 pt-6 border-t border-slate-800 flex flex-col md:flex-row items-center justify-center gap-3 text-sm">
+            <p className="text-slate-500 text-center md:text-left">
+              Copyright © {currentYear}. All rights reserved.
+            </p>
+
+            <p className="text-slate-500 text-center md:text-right">
               Designed by{" "}
               <a
                 href="https://starwaywebdigital.com"
@@ -268,13 +253,12 @@ export function Footer() {
               >
                 Starway
               </a>
-            </p>{" "}
+            </p>
           </div>
-          <p className="text-slate-400 text-sm text-center sm:text-right">
-            Copyright © {currentYear}. All rights reserved.
-          </p>
         </div>
       </div>
+      {/* Bottom Footer */}
+
     </footer>
   );
 }
