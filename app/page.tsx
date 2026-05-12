@@ -51,11 +51,11 @@ export default function Home() {
         </section>
 
 
-        <DoctorsSection/>
+        <DoctorsSection />
 
         <TestimonialsSection />
         {/* Donation Section */}
-<DonationSection/>
+        <DonationSection />
         {/* CTA Section */}
         <section className="bg-emerald-500 text-white py-16">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">

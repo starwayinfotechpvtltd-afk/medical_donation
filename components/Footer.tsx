@@ -240,19 +240,7 @@ export function Footer() {
           {/* Bottom Row */}
           <div className="mt-6 pt-6 border-t border-slate-800 flex flex-col md:flex-row items-center justify-center gap-3 text-sm">
             <p className="text-slate-500 text-center md:text-left">
-              Copyright © {currentYear}. All rights reserved.
-            </p>
-
-            <p className="text-slate-500 text-center md:text-right">
-              Designed by{" "}
-              <a
-                href="https://starwaywebdigital.com"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="text-emerald-400 font-medium hover:underline"
-              >
-                Starway
-              </a>
+              Copyright © {currentYear}. All rights reserved by {hospitalInfo.name}.
             </p>
           </div>
         </div>

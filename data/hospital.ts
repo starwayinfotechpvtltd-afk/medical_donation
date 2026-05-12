@@ -1,10 +1,10 @@
 export const hospitalInfo = {
-  name: "Advanced Medical Care Hospital",
+  name: "Mefigure Siddhi Vadanta",
   tagline: "Your Health, Our Priority",
   description: "Leading multi-specialty hospital providing comprehensive healthcare services.",
   
   history:
-    "Advanced Medical Care Hospital was established in 2005 with a vision to provide world-class healthcare facilities. Over the years, we have grown to become one of the most trusted healthcare providers in the region.",
+    "Mefigure Siddhi Vadanta was established in 2005 with a vision to provide world-class healthcare facilities. Over the years, we have grown to become one of the most trusted healthcare providers in the region.",
   
   mission:
     "To provide compassionate, high-quality healthcare services with the latest medical technology and expert physicians to every patient.",
@@ -13,7 +13,7 @@ export const hospitalInfo = {
     "To be the most trusted and preferred healthcare provider, recognized for excellence in patient care, medical innovation, and community service.",
   
   directorMessage:
-    "At Advanced Medical Care Hospital, we believe that every patient deserves the best healthcare. Our dedicated team of healthcare professionals works tirelessly to ensure your well-being. We combine advanced medical technology with compassionate care to provide you with the finest healthcare experience.",
+    "At Mefigure Siddhi Vadanta, we believe that every patient deserves the best healthcare. Our dedicated team of healthcare professionals works tirelessly to ensure your well-being. We combine advanced medical technology with compassionate care to provide you with the finest healthcare experience.",
   
   founderName: "Dr. Arun Gupta",
   directorName: "Dr. Priya Kapoor",

@@ -5,7 +5,7 @@ import { DepartmentCard } from "@/components/DepartmentCard";
 import { departments } from "@/data/departments";
 
 export const metadata = {
-  title: "Our Departments - Advanced Medical Care Hospital",
+  title: "Our Departments - Mefigure Siddhi Vadanta",
   description: "Explore our various medical departments and specializations.",
 };
 

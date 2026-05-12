@@ -6,7 +6,7 @@ import { hospitalInfo } from "@/data/hospital";
 import { Check } from "lucide-react";
 
 export const metadata = {
-  title: "About Us - Advanced Medical Care Hospital",
+  title: "About Us - Mefigure Siddhi Vadanta",
   description: "Learn about our hospital's history, mission, vision, and leadership team.",
 };
 
