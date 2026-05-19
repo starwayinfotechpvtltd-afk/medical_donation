@@ -1,49 +1,45 @@
-// app/donate/page.tsx
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
+
 import {
   Heart,
   Shield,
-  CreditCard,
-  Banknote,
-  MapPin,
-  Calendar,
   Users,
   Stethoscope,
-  GraduationCap,
   Microscope,
   Award,
-  CheckCircle,
-  ChevronRight,
-  Phone,
-  Mail,
-  Clock,
-  FileText,
-  Download,
-  Printer,
   Receipt,
-  ArrowRight,
-  IndianRupee,
   Building2,
   BadgeCheck,
-  TrendingUp,
 } from "lucide-react";
 
 import { Swiper, SwiperSlide } from "swiper/react";
 import { Autoplay, Pagination } from "swiper/modules";
 import { Navbar } from "@/components/Navbar";
 import { Footer } from "@/components/Footer";
+import { ApiException } from "@/lib/api-client";
+import { donationApi, type DonationCampaign } from "@/lib/donation-api";
+
+declare global {
+  interface Window {
+    Razorpay?: new (options: Record<string, unknown>) => { open: () => void };
+  }
+}
 
 export default function DonationPage() {
-  const [selectedAmount, setSelectedAmount] = useState<number | null>(null);
   const [customAmount, setCustomAmount] = useState("");
   const [donationType, setDonationType] = useState<"one-time" | "monthly">(
     "one-time",
   );
-  const [step, setStep] = useState(1);
+  const [campaigns, setCampaigns] = useState<DonationCampaign[]>([]);
+  const [selectedCampaignId, setSelectedCampaignId] = useState<number | null>(null);
+  const [isLoadingCampaigns, setIsLoadingCampaigns] = useState(true);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [submitMessage, setSubmitMessage] = useState("");
+  const [submitError, setSubmitError] = useState("");
   const [formData, setFormData] = useState({
     fullName: "",
     email: "",
@@ -58,17 +54,53 @@ export default function DonationPage() {
     taxBenefit: true,
   });
 
-  const amountOptions = [500, 1000, 2500, 5000, 10000];
+  useEffect(() => {
+    let isMounted = true;
 
-  const handleAmountSelect = (amount: number) => {
-    setSelectedAmount(amount);
-    setCustomAmount("");
-  };
+    const loadCampaigns = async () => {
+      try {
+        setIsLoadingCampaigns(true);
+        const response = await donationApi.listActiveCampaigns();
+        const activeCampaigns = response.data ?? [];
+
+        if (!isMounted) return;
+
+        setCampaigns(activeCampaigns);
+        setSelectedCampaignId(activeCampaigns[0]?.id ?? null);
+      } catch (err) {
+        if (!isMounted) return;
+        setSubmitError(
+          err instanceof ApiException
+            ? err.message
+            : "Unable to load donation campaigns right now.",
+        );
+      } finally {
+        if (isMounted) setIsLoadingCampaigns(false);
+      }
+    };
+
+    loadCampaigns();
+
+    return () => {
+      isMounted = false;
+    };
+  }, []);
 
   const handleCustomAmountChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value;
     setCustomAmount(value);
-    setSelectedAmount(null);
+  };
+
+  const ensureRazorpayLoaded = async () => {
+    if (window.Razorpay) return true;
+    await new Promise<void>((resolve, reject) => {
+      const script = document.createElement("script");
+      script.src = "https://checkout.razorpay.com/v1/checkout.js";
+      script.onload = () => resolve();
+      script.onerror = () => reject(new Error("Failed to load Razorpay checkout script."));
+      document.body.appendChild(script);
+    });
+    return !!window.Razorpay;
   };
 
   const handleInputChange = (
@@ -84,63 +116,147 @@ export default function DonationPage() {
     }));
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    // Handle donation submission
-    console.log("Donation submitted:", {
-      amount: selectedAmount || customAmount,
-      type: donationType,
-      ...formData,
-    });
-    alert(
-      "Thank you for your generous donation! You will receive a confirmation email shortly.",
-    );
+    setSubmitError("");
+    setSubmitMessage("");
+
+    const amount = Number(customAmount);
+
+    if (!selectedCampaignId) {
+      setSubmitError("Please select a donation campaign.");
+      return;
+    }
+
+    if (!amount || Number.isNaN(amount) || amount <= 0) {
+      setSubmitError("Please enter a valid donation amount.");
+      return;
+    }
+
+    const donorDetails = [
+      `Type: ${donationType}`,
+      formData.fullName ? `Name: ${formData.fullName}` : "",
+      formData.email ? `Email: ${formData.email}` : "",
+      formData.phone ? `Phone: ${formData.phone}` : "",
+      formData.message ? `Message: ${formData.message}` : "",
+    ]
+      .filter(Boolean)
+      .join(" | ")
+      .slice(0, 500);
+
+    try {
+      setIsSubmitting(true);
+      const response = await donationApi.donate(selectedCampaignId, {
+        amount,
+        currency: "INR",
+        payment_method: "other",
+        donor_name: formData.fullName.trim(),
+        donor_email: formData.email.trim(),
+        donor_phone: formData.phone.trim(),
+        donor_pan: formData.panNumber.trim() || null,
+        donor_address: [formData.address, formData.city, formData.state, formData.pincode].filter(Boolean).join(", ") || null,
+        is_anonymous: formData.anonymous,
+        donor_message: donorDetails || null,
+      });
+      const init = response.data;
+      if (!init) throw new Error("Donation initiation failed.");
+
+      const loaded = await ensureRazorpayLoaded();
+      if (!loaded || !window.Razorpay) throw new Error("Razorpay SDK not available.");
+
+      const rz = new window.Razorpay({
+        key: init.razorpay_key_id,
+        amount: init.amount,
+        currency: init.currency,
+        name: "HospitalMS",
+        description: `Donation - ${init.campaign_title}`,
+        order_id: init.razorpay_order_id,
+        prefill: {
+          name: formData.fullName,
+          email: formData.email,
+          contact: formData.phone,
+        },
+        handler: async (rzp: Record<string, string>) => {
+          try {
+            const verify = await donationApi.verifyPayment({
+              razorpay_order_id: rzp.razorpay_order_id,
+              razorpay_payment_id: rzp.razorpay_payment_id,
+              razorpay_signature: rzp.razorpay_signature,
+            });
+            setSubmitMessage(
+              verify.data?.transaction_ref
+                ? `Thank you for your generous donation. Reference: ${verify.data.transaction_ref}`
+                : "Thank you for your generous donation.",
+            );
+            setCustomAmount("");
+            setFormData((prev) => ({ ...prev, message: "" }));
+          } catch (verifyErr) {
+            setSubmitError(
+              verifyErr instanceof ApiException
+                ? verifyErr.message
+                : "Payment captured, but verification failed. Please contact support.",
+            );
+          }
+        },
+        theme: { color: "#059669" },
+      });
+
+      rz.open();
+    } catch (err) {
+      setSubmitError(
+        err instanceof ApiException
+          ? err.message
+          : "Unable to submit your donation right now.",
+      );
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
-  const impacts = [
-    {
-      icon: Shield,
-      title: "Medical Equipment",
-      description: "Advanced diagnostic and treatment equipment",
-      amount: 50000,
-      impact: "Supports one medical device purchase",
-    },
-    {
-      icon: Users,
-      title: "Patient Care",
-      description: "Free treatments for underprivileged patients",
-      amount: 25000,
-      impact: "Covers treatment for 10 patients",
-    },
-    {
-      icon: Stethoscope,
-      title: "Emergency Services",
-      description: "24/7 emergency response support",
-      amount: 100000,
-      impact: "Funds emergency ambulance operations",
-    },
-    {
-      icon: GraduationCap,
-      title: "Medical Education",
-      description: "Scholarships for healthcare students",
-      amount: 75000,
-      impact: "Supports one nursing student annually",
-    },
-    {
-      icon: Microscope,
-      title: "Medical Research",
-      description: "Life-saving research initiatives",
-      amount: 200000,
-      impact: "Funds critical research project",
-    },
-    {
-      icon: Heart,
-      title: "General Support",
-      description: "Where most needed",
-      amount: 10000,
-      impact: "Flexible support for hospital needs",
-    },
-  ];
+const impacts = [
+  {
+    icon: Shield,
+    title: "Medical Equipment",
+    description: "Advanced diagnostic and treatment equipment",
+    amount: 50000,
+    impact: "Supports one medical device purchase",
+  },
+  {
+    icon: Users,
+    title: "Patient Care",
+    description: "Free treatments for underprivileged patients",
+    amount: 25000,
+    impact: "Covers treatment for 10 patients",
+  },
+  {
+    icon: Stethoscope,
+    title: "Emergency Services",
+    description: "24/7 emergency response support",
+    amount: 100000,
+    impact: "Funds emergency ambulance operations",
+  },
+  {
+    icon: Heart,
+    title: "Child Healthcare",
+    description: "Essential treatment and nutrition for children",
+    amount: 60000,
+    impact: "Supports healthcare for 20 children",
+  },
+  {
+    icon: Microscope,
+    title: "Medical Research",
+    description: "Life-saving research initiatives",
+    amount: 200000,
+    impact: "Funds critical research project",
+  },
+  {
+    icon: Users,
+    title: "Senior Citizen Care",
+    description: "Healthcare assistance for elderly patients",
+    amount: 40000,
+    impact: "Provides care for 15 senior citizens",
+  },
+];
 
   const slides = [
     "/images/home/hero_image_2.webp",
@@ -237,6 +353,31 @@ export default function DonationPage() {
                 </div>
 
                 <form onSubmit={handleSubmit} className="p-6 space-y-6">
+                  {/* Campaign Selection */}
+                  <div>
+                    <label className="block text-sm font-medium text-slate-700 mb-2">
+                      Donation Campaign
+                    </label>
+                    <select
+                      value={selectedCampaignId ?? ""}
+                      onChange={(event) => setSelectedCampaignId(Number(event.target.value))}
+                      disabled={isLoadingCampaigns || campaigns.length === 0}
+                      className="w-full px-4 py-2 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-400 disabled:bg-slate-100 disabled:text-slate-500"
+                    >
+                      {isLoadingCampaigns ? (
+                        <option>Loading campaigns...</option>
+                      ) : campaigns.length > 0 ? (
+                        campaigns.map((campaign) => (
+                          <option key={campaign.id} value={campaign.id}>
+                            {campaign.title}
+                          </option>
+                        ))
+                      ) : (
+                        <option>No active campaigns available</option>
+                      )}
+                    </select>
+                  </div>
+
                   {/* Donation Type Toggle */}
                   <div className="flex gap-3 p-1 bg-slate-100 rounded-lg">
                     <button
@@ -263,36 +404,25 @@ export default function DonationPage() {
                     </button>
                   </div>
 
-                  {/* Amount Options */}
+                  <div className="rounded-lg border border-emerald-100 bg-emerald-50 px-4 py-3 text-sm text-emerald-800">
+                    Secure payment is powered by Razorpay (UPI, Card, NetBanking, Wallet).
+                  </div>
+
+                  {/* Custom Amount */}
                   <div>
                     <label className="block text-sm font-medium text-slate-700 mb-3">
-                      Select Amount (₹)
+                      Enter Donation Amount (₹)
                     </label>
-                    <div className="grid grid-cols-3 sm:grid-cols-5 gap-3 mb-3">
-                      {amountOptions.map((amount) => (
-                        <button
-                          key={amount}
-                          type="button"
-                          onClick={() => handleAmountSelect(amount)}
-                          className={`px-4 py-2 rounded-lg font-medium transition-all ${
-                            selectedAmount === amount
-                              ? "bg-emerald-600 text-white shadow-md"
-                              : "bg-slate-100 text-slate-700 hover:bg-slate-200"
-                          }`}
-                        >
-                          ₹{amount}
-                        </button>
-                      ))}
-                    </div>
                     <div className="relative">
                       <span className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-500">
                         ₹
                       </span>
                       <input
                         type="number"
-                        placeholder="Custom amount"
+                        placeholder="Enter amount"
                         value={customAmount}
                         onChange={handleCustomAmountChange}
+                        min={1}
                         className="w-full pl-8 pr-4 py-2 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-400"
                       />
                     </div>
@@ -462,11 +592,24 @@ export default function DonationPage() {
                   {/* Submit Button */}
                   <button
                     type="submit"
-                    className="w-full bg-gradient-to-r from-emerald-600 to-teal-600 text-white py-3 rounded-lg font-semibold hover:from-emerald-700 hover:to-teal-700 transition-all"
+                    disabled={isSubmitting || isLoadingCampaigns || !selectedCampaignId}
+                    className="w-full bg-gradient-to-r from-emerald-600 to-teal-600 text-white py-3 rounded-lg font-semibold hover:from-emerald-700 hover:to-teal-700 transition-all disabled:opacity-60 disabled:cursor-not-allowed"
                   >
                     <Heart className="w-4 h-4 inline mr-2" />
-                    Donate Now
+                    {isSubmitting ? "Processing..." : "Donate Now"}
                   </button>
+
+                  {submitMessage && (
+                    <div className="rounded-lg border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-800">
+                      {submitMessage}
+                    </div>
+                  )}
+
+                  {submitError && (
+                    <div className="rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
+                      {submitError}
+                    </div>
+                  )}
 
                   <p className="text-xs text-center text-slate-500">
                     By donating, you agree to our{" "}
@@ -557,7 +700,7 @@ export default function DonationPage() {
                     </p>
                     <div className="bg-slate-50 rounded-lg p-3 space-y-1 text-sm">
                       <p className="text-slate-500">
-                        Account Name: MediCare Foundation
+                        Account Name: Mefigure Siddhi Vadanta
                       </p>
                       <p className="text-slate-500">Account No: 123456789012</p>
                       <p className="text-slate-500">IFSC Code: SBIN0012345</p>
@@ -575,7 +718,7 @@ export default function DonationPage() {
                         <Heart className="w-12 h-12 text-emerald-500" />
                       </div>
                       <p className="text-sm text-slate-600 mt-2">
-                        UPI ID: medicare@icici
+                        UPI ID: mefigure@icici
                       </p>
                     </div>
                   </div>
@@ -584,46 +727,6 @@ export default function DonationPage() {
             </div>
           </div>
 
-          {/* Carousel Section */}
-          <div className="mt-16">
-            <div className="text-center mb-8">
-              <h2 className="text-2xl font-bold text-slate-900 mb-2">
-                Our Impact in Action
-              </h2>
-              <p className="text-slate-500">
-                See how your donations are making a difference
-              </p>
-            </div>
-            <div className="rounded-2xl overflow-hidden h-[280px] md:h-[320px] relative">
-              <Swiper
-                modules={[Autoplay, Pagination]}
-                autoplay={{ delay: 4000, disableOnInteraction: false }}
-                loop={true}
-                pagination={{ clickable: true }}
-                className="w-full h-full"
-              >
-                {slides.map((img, index) => (
-                  <SwiperSlide key={index}>
-                    <div className="relative w-full h-full">
-                      <Image
-                        src={img}
-                        alt={`Healthcare Impact ${index}`}
-                        fill
-                        className="object-cover"
-                        priority={index === 0}
-                      />
-                      <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent"></div>
-                      <div className="absolute bottom-6 left-6 text-white">
-                        <p className="text-sm opacity-90">
-                          Making healthcare accessible for all
-                        </p>
-                      </div>
-                    </div>
-                  </SwiperSlide>
-                ))}
-              </Swiper>
-            </div>
-          </div>
 
           {/* Testimonials */}
           <div className="mt-16 bg-white rounded-2xl shadow-sm border border-slate-100 p-8">

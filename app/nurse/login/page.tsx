@@ -5,22 +5,30 @@ import { Heart } from 'lucide-react';
 import { useAuth } from '@/context/AuthContext';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
+import { getDashboardPathForRole } from '@/lib/auth-routes';
 
 export default function NurseLoginPage() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
+  const [loading, setLoading] = useState(false);
   const { login } = useAuth();
   const router = useRouter();
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
-    
-    if (login(email, password, 'nurse')) {
-      router.push('/nurse');
-    } else {
-      setError('Invalid email or password');
+    setLoading(true);
+
+    try {
+      const result = await login(email, password, 'nurse');
+      if (result.success) {
+        router.push(getDashboardPathForRole('nurse'));
+      } else {
+        setError(result.message);
+      }
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -76,9 +84,10 @@ export default function NurseLoginPage() {
 
             <button
               type="submit"
+              disabled={loading}
               className="w-full bg-gradient-to-r from-sky-500 to-blue-600 text-white py-3 rounded-lg font-bold hover:shadow-lg transition-all"
             >
-              Login as Nurse
+              {loading ? 'Logging in...' : 'Login as Nurse'}
             </button>
 
             {/* Demo Credentials */}
@@ -101,11 +110,11 @@ export default function NurseLoginPage() {
                   Patient Login
                 </Link>
                 {' | '}
-                <Link href="/doctor/login" className="text-blue-600 hover:text-blue-700 font-bold">
+                <Link href="/doctorLogin" className="text-blue-600 hover:text-blue-700 font-bold">
                   Doctor Login
                 </Link>
                 {' | '}
-                <Link href="/admin/login" className="text-slate-600 hover:text-slate-700 font-bold">
+                <Link href="/adminLogin" className="text-slate-600 hover:text-slate-700 font-bold">
                   Admin Login
                 </Link>
               </p>

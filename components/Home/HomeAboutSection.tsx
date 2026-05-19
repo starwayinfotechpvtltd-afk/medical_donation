@@ -1,6 +1,7 @@
 import Image from "next/image";
 import React from "react";
 import { CheckCircle } from "lucide-react";
+import Link from "next/link";
 
 export default function HomeAboutSection() {
   return (
@@ -71,9 +72,11 @@ export default function HomeAboutSection() {
               </ul>
 
               {/* Button */}
-              <button className="mt-6 bg-green-600 hover:bg-green-700 text-white px-6 py-3 rounded-xl font-semibold text-sm shadow-md transition">
-                More About Us
-              </button>
+<Link href="/about">
+  <button className="mt-6 bg-green-600 hover:bg-green-700 text-white px-6 py-3 rounded-xl font-semibold text-sm shadow-md transition cursor-pointer">
+    More About Us
+  </button>
+</Link>
             </div>
 
             {/* Experience Card */}

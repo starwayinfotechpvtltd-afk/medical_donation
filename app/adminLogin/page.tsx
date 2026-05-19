@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { useAuth } from '@/context/AuthContext';
 import { Eye, EyeOff, AlertCircle, Shield } from 'lucide-react';
+import { getDashboardPathForRole } from '@/lib/auth-routes';
 
 export default function AdminLogin() {
   const router = useRouter();
@@ -21,13 +22,13 @@ export default function AdminLogin() {
     setLoading(true);
 
     try {
-      const success = login(email, password, 'admin');
-      if (success) {
-        router.push('/admin');
+      const result = await login(email, password, 'admin');
+      if (result.success) {
+        router.push(getDashboardPathForRole('admin'));
       } else {
-        setError('Invalid email or password. Try admin@hospital.com / admin123');
+        setError(result.message);
       }
-    } catch (err) {
+    } catch {
       setError('An error occurred. Please try again.');
     } finally {
       setLoading(false);

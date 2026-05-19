@@ -1,7 +1,7 @@
 'use client';
 
 import { usePathname } from 'next/navigation';
-import { Heart, Camera, Clock, Search } from 'lucide-react';
+import NurseProtected from '@/components/NurseProtected';
 
 export default function NurseLayout({
   children,
@@ -15,5 +15,5 @@ export default function NurseLayout({
     return children;
   }
 
-  return <>{children}</>;
+  return <NurseProtected>{children}</NurseProtected>;
 }

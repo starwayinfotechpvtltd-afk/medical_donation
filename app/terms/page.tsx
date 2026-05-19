@@ -15,8 +15,13 @@ import { Navbar } from '@/components/Navbar';
 import { Footer } from '@/components/Footer';
 
 export default function TermsConditions() {
-  const [lastUpdated] = useState('May 1, 2024');
-  
+const [lastUpdated] = useState(
+  new Date().toLocaleDateString("en-US", {
+    year: "numeric",
+    month: "long",
+    day: "numeric",
+  })
+);
   useEffect(() => {
     window.scrollTo(0, 0);
   }, []);
@@ -146,13 +151,13 @@ export default function TermsConditions() {
               </div>
               <div className="p-6 space-y-4 text-slate-600">
                 <p>
-                  By accessing and using MediCare's website, mobile application, and related services 
+                  By accessing and using Mefigure Siddhi Vadanta's website, mobile application, and related services 
                   (collectively, the "Platform"), you agree to comply with and be bound by these Terms 
                   and Conditions. If you do not agree to these terms, please do not use our Platform.
                 </p>
                 <p>
                   These terms constitute a legally binding agreement between you ("Patient," "User," 
-                  "you") and MediCare Hospital ("Company," "we," "us," "our"). By using our services, 
+                  "you") and Mefigure Siddhi Vadanta ("Company," "we," "us," "our"). By using our services, 
                   you represent that you are at least 18 years of age or have parental consent.
                 </p>
                 <div className="bg-emerald-50 rounded-lg p-4 border border-emerald-100">
@@ -177,7 +182,7 @@ export default function TermsConditions() {
               </div>
               <div className="p-6 space-y-4 text-slate-600">
                 <p>
-                  MediCare provides a range of healthcare services including but not limited to:
+                  Mefigure Siddhi Vadanta provides a range of healthcare services including but not limited to:
                 </p>
                 <ul className="list-disc list-inside space-y-2 ml-4">
                   <li>Online appointment scheduling with healthcare providers</li>
@@ -378,7 +383,7 @@ export default function TermsConditions() {
               </div>
               <div className="p-6 space-y-4 text-slate-600">
                 <p>
-                  To the fullest extent permitted by law, MediCare and its affiliates, officers, 
+                  To the fullest extent permitted by law, Mefigure Siddhi Vadanta and its affiliates, officers, 
                   directors, employees, and agents shall not be liable for:
                 </p>
                 <ul className="list-disc list-inside space-y-2 ml-4">
@@ -500,11 +505,11 @@ export default function TermsConditions() {
                     </div>
                     <div className="flex items-center gap-2">
                       <Mail className="w-4 h-4 text-emerald-500" />
-                      <span className="text-sm text-slate-700">legal@medicare.com</span>
+                      <span className="text-sm text-slate-700">legal@mefigurefoundation.com</span>
                     </div>
                     <div className="flex items-center gap-2">
                       <Building2 className="w-4 h-4 text-emerald-500" />
-                      <span className="text-sm text-slate-700">MediCare Hospital, 123 Healthcare Avenue, Mumbai - 400001</span>
+                      <span className="text-sm text-slate-700">Mefigure Siddhi Vadanta, H NO 32, VILLAGE GARHI NAWABAD, Grahi Noabad, Budhana, Muzaffarnagar</span>
                     </div>
                   </div>
                 </div>
@@ -513,7 +518,7 @@ export default function TermsConditions() {
                   <p className="text-sm text-blue-800 flex items-start gap-2">
                     <CheckCircle className="w-4 h-4 mt-0.5 flex-shrink-0" />
                     <span>
-                      <strong>Tax Benefits:</strong> Donations made to MediCare Hospital are eligible for 
+                      <strong>Tax Benefits:</strong> Donations made to Mefigure Siddhi Vadanta are eligible for 
                       deduction under Section 80G of the Income Tax Act. Please consult your tax advisor 
                       for more information.
                     </span>
@@ -531,7 +536,7 @@ export default function TermsConditions() {
                 </div>
                 <div className="flex gap-3">
                   <a 
-                    href="mailto:legal@medicare.com" 
+                    href="mailto:legal@mefigurefoundation.com" 
                     className="flex items-center gap-2 px-4 py-2 bg-white text-emerald-600 rounded-lg font-medium hover:bg-emerald-50 transition-colors"
                   >
                     <Mail className="w-4 h-4" />

@@ -77,11 +77,8 @@ export default function DonationSection() {
                 Your support ensures access to quality healthcare for those who
                 need it most.
               </p>
-
-              <Link href="/donate">
-                <button className="bg-emerald-500 hover:bg-emerald-600 px-6 py-2 rounded-lg font-semibold transition">
-                  Donate Now
-                </button>
+              <Link href="/donate" className="bg-emerald-500 hover:bg-emerald-600 px-6 py-2 rounded-lg font-semibold transition">
+                Donate Now
               </Link>
             </div>
           </div>

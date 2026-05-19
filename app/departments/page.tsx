@@ -5,7 +5,7 @@ import { DepartmentCard } from "@/components/DepartmentCard";
 import { departments } from "@/data/departments";
 
 export const metadata = {
-  title: "Our Departments - Mefigure Siddhi Vadanta",
+  title: "Our Departments - Explore Medical Specializations at Mefigure Siddhi Vadanta Foundation",
   description: "Explore our various medical departments and specializations.",
 };
 
@@ -21,7 +21,7 @@ export default function Departments() {
               Our Departments
             </h1>
             <p className="text-xl text-slate-700 max-w-2xl">
-              Comprehensive healthcare services across multiple medical specializations
+              Comprehensive healthcare services across multiple medical specializations at Mefigure Siddhi Vadanta Foundation.
             </p>
           </div>
         </section>

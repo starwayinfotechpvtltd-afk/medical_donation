@@ -24,13 +24,9 @@ export default function Home() {
     <>
       <Navbar />
       <main>
-        {/* Hero Section */}
         <HeroSection />
-
         <HomeAboutSection />
-
         <HomeServicesSection />
-
         {/* Departments Section */}
         <section className="w-full">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20">
@@ -49,10 +45,7 @@ export default function Home() {
             </div>
           </div>
         </section>
-
-
         <DoctorsSection />
-
         <TestimonialsSection />
         {/* Donation Section */}
         <DonationSection />

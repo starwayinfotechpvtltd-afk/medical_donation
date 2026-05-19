@@ -114,8 +114,8 @@ interface SettingsData {
 // Mock Data
 const mockSettings: SettingsData = {
   profile: {
-    hospitalName: "MediCare Hospital",
-    hospitalEmail: "contact@medicare.com",
+    hospitalName: "Mefigure Siddhi Vadanta",
+    hospitalEmail: "contact@mefigurefoundation.com",
     hospitalPhone: "+91 98765 43210",
     hospitalAddress: "123 Healthcare Avenue",
     hospitalCity: "Mumbai",
@@ -149,7 +149,7 @@ const mockSettings: SettingsData = {
     passwordExpiryDays: 90,
     maxLoginAttempts: 5,
     ipWhitelist: ['192.168.1.1', '10.0.0.1'],
-    allowedDomains: ['medicare.com', 'hospital.com'],
+    allowedDomains: ['mefigurefoundation.com'],
     requireStrongPassword: true,
     auditLogRetention: 365,
   },
@@ -191,7 +191,7 @@ const mockSettings: SettingsData = {
     subscriptionId: 'sub_xxxxxxxxxxxxx',
     nextBillingDate: '2024-04-15',
     paymentMethod: 'Visa ending in 4242',
-    invoiceEmail: 'billing@medicare.com',
+    invoiceEmail: 'billing@mefigurefoundation.com',
     taxId: 'GST123456789',
   },
 };

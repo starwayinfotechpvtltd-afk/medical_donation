@@ -1,7 +1,9 @@
 // app/doctor/lab-tests/page.tsx
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
+import { useSearchParams } from 'next/navigation';
+import { api, ApiException } from '@/lib/api-client';
 import {
   FlaskConical, Search, Filter, Plus, Download, Printer,
   Eye, Edit2, Trash2, CheckCircle2, XCircle, Clock,
@@ -163,7 +165,7 @@ function LabTestCard({ test, onView, onEdit, onOrder }: any) {
           <div className="flex items-center gap-2 mb-1">
             <User className="w-4 h-4 text-slate-400" />
             <span className="text-sm font-medium text-slate-900">{test.patientName}</span>
-            <span className="text-xs text-slate-500">ID: {test.patientId}</span>
+            <span className="text-xs text-slate-500">Reg No: {test.patientRegNo || test.patientId || '-'}</span>
           </div>
           <div className="flex items-center gap-2 text-xs text-slate-500">
             <Calendar className="w-3.5 h-3.5" />
@@ -203,11 +205,22 @@ function LabTestModal({ test, isOpen, onClose, onSave }: any) {
   const [formData, setFormData] = useState(test || {
     testName: '',
     category: '',
-    patientName: '',
-    patientId: '',
+    patientRegNo: '',
+    appointmentId: '',
     priority: 'routine',
     notes: ''
   });
+
+  useEffect(() => {
+    setFormData(test || {
+      testName: '',
+      category: '',
+      patientRegNo: '',
+      appointmentId: '',
+      priority: 'routine',
+      notes: ''
+    });
+  }, [test, isOpen]);
   
   if (!isOpen) return null;
   
@@ -220,6 +233,8 @@ function LabTestModal({ test, isOpen, onClose, onSave }: any) {
     e.preventDefault();
     onSave({
       ...formData,
+      patientName: formData.patientName || formData.patientRegNo,
+      patientId: formData.patientId || formData.patientRegNo,
       id: test?.id || `LAB${Date.now()}`,
       requestedDate: test?.requestedDate || new Date().toISOString().split('T')[0],
       status: 'pending'
@@ -284,26 +299,26 @@ function LabTestModal({ test, isOpen, onClose, onSave }: any) {
             </div>
             <div>
               <label className="block text-sm font-medium text-slate-700 mb-1">
-                Patient Name *
+                Patient Reg No *
               </label>
               <input
                 type="text"
-                value={formData.patientName}
-                onChange={(e) => setFormData({ ...formData, patientName: e.target.value })}
+                value={formData.patientRegNo}
+                onChange={(e) => setFormData({ ...formData, patientRegNo: e.target.value })}
                 className="w-full px-3 py-2 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500/20"
                 required
               />
             </div>
             <div>
               <label className="block text-sm font-medium text-slate-700 mb-1">
-                Patient ID *
+                Appointment ID
               </label>
               <input
                 type="text"
-                value={formData.patientId}
-                onChange={(e) => setFormData({ ...formData, patientId: e.target.value })}
+                value={formData.appointmentId}
+                onChange={(e) => setFormData({ ...formData, appointmentId: e.target.value })}
                 className="w-full px-3 py-2 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500/20"
-                required
+                placeholder="Auto-filled from shortcut if available"
               />
             </div>
             <div className="md:col-span-2">
@@ -379,7 +394,7 @@ function LabTestViewModal({ test, onClose, onOrderNew }: any) {
               <div className="flex items-center gap-2">
                 <User className="w-4 h-4 text-slate-400" />
                 <span className="text-sm text-slate-700">{test.patientName}</span>
-                <span className="text-xs text-slate-500">ID: {test.patientId}</span>
+                <span className="text-xs text-slate-500">Reg No: {test.patientRegNo || test.patientId || '-'}</span>
               </div>
               <div className="flex items-center gap-2">
                 <Calendar className="w-4 h-4 text-slate-400" />
@@ -482,19 +497,23 @@ function LabTestViewModal({ test, onClose, onOrderNew }: any) {
 }
 
 export default function DoctorLabTests() {
+  const searchParams = useSearchParams();
   const [tests, setTests] = useState(mockLabTests);
+  const [error, setError] = useState('');
   const [searchQuery, setSearchQuery] = useState('');
   const [statusFilter, setStatusFilter] = useState('All');
   const [categoryFilter, setCategoryFilter] = useState('All');
   const [selectedTest, setSelectedTest] = useState(null);
   const [showViewModal, setShowViewModal] = useState(false);
   const [showOrderModal, setShowOrderModal] = useState(false);
+  const [prefillOrder, setPrefillOrder] = useState<any>(null);
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 6;
   
   const filteredTests = tests.filter(test => {
     const matchesSearch = test.testName.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                          test.patientName.toLowerCase().includes(searchQuery.toLowerCase());
+                          String(test.patientName || '').toLowerCase().includes(searchQuery.toLowerCase()) ||
+                          String(test.patientRegNo || '').toLowerCase().includes(searchQuery.toLowerCase());
     const matchesStatus = statusFilter === 'All' || test.status === statusFilter.toLowerCase();
     const matchesCategory = categoryFilter === 'All' || test.category === categoryFilter;
     return matchesSearch && matchesStatus && matchesCategory;
@@ -516,10 +535,54 @@ export default function DoctorLabTests() {
     urgent: tests.filter(t => t.priority === 'urgent' || t.priority === 'stat').length
   };
   
-  const handleOrderTest = (data: any) => {
-    setTests([data, ...tests]);
-    setShowOrderModal(false);
+  const categoryToApi = (category: string) => {
+    const normalized = (category || '').trim().toLowerCase();
+    const allowed = ['hematology', 'biochemistry', 'microbiology', 'immunology', 'radiology', 'cardiology', 'pathology', 'other'];
+    return allowed.includes(normalized) ? normalized : 'other';
   };
+
+  const handleOrderTest = async (data: any) => {
+    setError('');
+    try {
+      await api.post('/lab/lab-tests', {
+        patient_reg_no: data.patientRegNo,
+        appointment_id: data.appointmentId ? Number(data.appointmentId) : null,
+        test_name: data.testName,
+        test_type: data.testName,
+        category: categoryToApi(data.category),
+        priority: data.priority || 'routine',
+        notes: data.notes || null,
+      });
+      setTests([data, ...tests]);
+      setShowOrderModal(false);
+      setPrefillOrder(null);
+    } catch (err) {
+      setError(err instanceof ApiException ? err.message : 'Failed to order lab test.');
+    }
+  };
+
+  useEffect(() => {
+    const patientRegNo = (searchParams.get('patientRegNo') || '').trim();
+    const appointmentId = (searchParams.get('appointmentId') || '').trim();
+    const action = (searchParams.get('action') || '').trim().toLowerCase();
+
+    if (!patientRegNo) return;
+
+    setSearchQuery(patientRegNo);
+    setPrefillOrder({
+      testName: '',
+      category: '',
+      patientRegNo,
+      appointmentId,
+      priority: 'routine',
+      notes: '',
+    });
+
+    if (action === 'create') {
+      setSelectedTest(null);
+      setShowOrderModal(true);
+    }
+  }, [searchParams]);
   
   return (
     <div className="p-4 sm:p-6 space-y-6 max-w-7xl mx-auto">
@@ -542,6 +605,7 @@ export default function DoctorLabTests() {
       </div>
       
       {/* Stats */}
+      {error && <div className="rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">{error}</div>}
       <div className="grid grid-cols-2 lg:grid-cols-5 gap-4">
         <div className="bg-white rounded-xl border border-slate-100 p-4">
           <div className="flex items-center justify-between mb-2">
@@ -716,11 +780,12 @@ export default function DoctorLabTests() {
       />
       
       <LabTestModal
-        test={selectedTest}
+        test={prefillOrder || selectedTest}
         isOpen={showOrderModal}
         onClose={() => {
           setShowOrderModal(false);
           setSelectedTest(null);
+          setPrefillOrder(null);
         }}
         onSave={handleOrderTest}
       />

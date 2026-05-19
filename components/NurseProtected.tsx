@@ -5,19 +5,19 @@ import { useRouter } from 'next/navigation';
 import { useAuth } from '@/context/AuthContext';
 import { getLoginPathForRole } from '@/lib/auth-routes';
 
-interface LabTechProtectedProps {
+interface NurseProtectedProps {
   children: React.ReactNode;
 }
 
-export default function LabTechProtected({ children }: LabTechProtectedProps) {
+export default function NurseProtected({ children }: NurseProtectedProps) {
   const router = useRouter();
   const { isAuthenticated, isLoading, user } = useAuth();
 
   useEffect(() => {
-    if (!isLoading && (!isAuthenticated || user?.role !== 'lab_technician')) {
-      router.replace(getLoginPathForRole('lab_technician'));
+    if (!isLoading && (!isAuthenticated || user?.role !== 'nurse')) {
+      router.replace(getLoginPathForRole('nurse'));
     }
-  }, [isAuthenticated, isLoading, user, router]);
+  }, [isAuthenticated, isLoading, router, user]);
 
   if (isLoading) {
     return (
@@ -30,7 +30,7 @@ export default function LabTechProtected({ children }: LabTechProtectedProps) {
     );
   }
 
-  if (!isAuthenticated || user?.role !== 'lab_technician') {
+  if (!isAuthenticated || user?.role !== 'nurse') {
     return null;
   }
 

@@ -1,91 +1,79 @@
-'use client';
+﻿'use client';
 
-import { Calendar, Stethoscope, AlertCircle, CheckCircle } from 'lucide-react';
+import { useEffect, useMemo, useState } from 'react';
+import { History, Stethoscope } from 'lucide-react';
+import { api, ApiException } from '@/lib/api-client';
 
-const medicalHistory = [
-  { id: 1, date: '2024-03-20', type: 'Consultation', doctor: 'Dr. Rajesh Kumar', notes: 'Regular check-up, blood pressure normal, continue current medication' },
-  { id: 2, date: '2024-02-15', type: 'Treatment', doctor: 'Dr. Rajesh Kumar', notes: 'Started Aspirin for hypertension management, follow up in 2 weeks' },
-  { id: 3, date: '2024-01-20', type: 'Diagnosis', doctor: 'Dr. Anjali Singh', notes: 'Diagnosed with mild thyroid dysfunction, prescribed medication' },
-  { id: 4, date: '2023-12-10', type: 'Follow-up', doctor: 'Dr. Rajesh Kumar', notes: 'Patient improving well, continue current treatment plan' },
-];
+interface MedicalRecordItem {
+  id: number;
+  visit_date: string;
+  diagnosis?: string | null;
+  symptoms?: string | null;
+  treatment_plan?: string | null;
+  notes?: string | null;
+  doctor_first_name?: string | null;
+  doctor_last_name?: string | null;
+  doctor_specialization?: string | null;
+  department_name?: string | null;
+}
 
 export default function MedicalHistoryViewPage() {
-  const getTypeIcon = (type: string) => {
-    switch (type) {
-      case 'Consultation': return <Stethoscope className="w-5 h-5" />;
-      case 'Treatment': return <AlertCircle className="w-5 h-5" />;
-      case 'Diagnosis': return <AlertCircle className="w-5 h-5" />;
-      case 'Follow-up': return <CheckCircle className="w-5 h-5" />;
-      default: return <Calendar className="w-5 h-5" />;
+  const [rows, setRows] = useState<MedicalRecordItem[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState('');
+
+  const load = async () => {
+    setLoading(true);
+    setError('');
+    try {
+      const res = await api.get<MedicalRecordItem[]>('/patient/medical-history');
+      setRows((res.data ?? []) as MedicalRecordItem[]);
+    } catch (err) {
+      setError(err instanceof ApiException ? err.message : 'Failed to load medical history.');
+    } finally {
+      setLoading(false);
     }
   };
 
-  const getTypeColor = (type: string) => {
-    switch (type) {
-      case 'Consultation': return 'bg-blue-100 text-blue-700';
-      case 'Treatment': return 'bg-purple-100 text-purple-700';
-      case 'Diagnosis': return 'bg-red-100 text-red-700';
-      case 'Follow-up': return 'bg-green-100 text-green-700';
-      default: return 'bg-slate-100 text-slate-700';
-    }
-  };
+  useEffect(() => {
+    void load();
+  }, []);
+
+  const totalWithDiagnosis = useMemo(() => rows.filter((r) => !!r.diagnosis).length, [rows]);
 
   return (
-    <div className="p-8 bg-gradient-to-br from-blue-50 to-sky-50 min-h-screen">
-      <div className="max-w-4xl mx-auto">
-        <div className="mb-8">
-          <h1 className="text-4xl font-bold text-slate-900 mb-2">Medical History</h1>
-          <p className="text-slate-600">Complete record of your medical visits and treatments</p>
-        </div>
-
-        {/* Stats */}
-        <div className="grid md:grid-cols-4 gap-4 mb-8">
-          <div className="bg-white rounded-xl shadow-sm p-6 border-l-4 border-blue-500">
-            <p className="text-slate-600 text-sm mb-2">Total Visits</p>
-            <p className="text-3xl font-bold text-slate-900">{medicalHistory.length}</p>
-          </div>
-          <div className="bg-white rounded-xl shadow-sm p-6 border-l-4 border-purple-500">
-            <p className="text-slate-600 text-sm mb-2">Consultations</p>
-            <p className="text-3xl font-bold text-slate-900">2</p>
-          </div>
-          <div className="bg-white rounded-xl shadow-sm p-6 border-l-4 border-red-500">
-            <p className="text-slate-600 text-sm mb-2">Diagnoses</p>
-            <p className="text-3xl font-bold text-slate-900">1</p>
-          </div>
-          <div className="bg-white rounded-xl shadow-sm p-6 border-l-4 border-green-500">
-            <p className="text-slate-600 text-sm mb-2">Follow-ups</p>
-            <p className="text-3xl font-bold text-slate-900">1</p>
-          </div>
-        </div>
-
-        {/* Timeline */}
-        <div className="space-y-4">
-          {medicalHistory.map((record, idx) => (
-            <div key={record.id} className="relative">
-              {idx !== medicalHistory.length - 1 && (
-                <div className="absolute left-6 top-12 w-1 h-8 bg-blue-200"></div>
-              )}
-              <div className="bg-white rounded-xl shadow-sm p-6">
-                <div className="flex gap-4">
-                  <div className={`p-3 rounded-lg ${getTypeColor(record.type)}`}>
-                    {getTypeIcon(record.type)}
-                  </div>
-                  <div className="flex-1">
-                    <div className="flex justify-between items-start mb-2">
-                      <div>
-                        <h3 className="text-lg font-bold text-slate-900">{record.type}</h3>
-                        <p className="text-slate-600 text-sm">Dr. {record.doctor.split(' ').pop()}</p>
-                      </div>
-                      <span className="text-slate-600 text-sm font-semibold">{record.date}</span>
-                    </div>
-                    <p className="text-slate-600">{record.notes}</p>
-                  </div>
-                </div>
-              </div>
-            </div>
-          ))}
-        </div>
+    <div className="mx-auto max-w-7xl space-y-6 p-4 sm:p-6">
+      <div>
+        <h1 className="text-2xl font-bold text-slate-900">Medical History</h1>
+        <p className="text-sm text-slate-500">Complete visit timeline with doctor and treatment details.</p>
       </div>
+
+      {error && <div className="rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">{error}</div>}
+
+      <div className="grid grid-cols-2 gap-4 lg:grid-cols-3">
+        <div className="rounded-xl border border-slate-100 bg-white p-4"><p className="text-xs text-slate-500">Total Records</p><p className="text-2xl font-bold">{rows.length}</p></div>
+        <div className="rounded-xl border border-slate-100 bg-white p-4"><p className="text-xs text-slate-500">Diagnoses</p><p className="text-2xl font-bold">{totalWithDiagnosis}</p></div>
+        <div className="rounded-xl border border-slate-100 bg-white p-4"><p className="text-xs text-slate-500">Departments</p><p className="text-2xl font-bold">{new Set(rows.map((r) => r.department_name).filter(Boolean)).size}</p></div>
+      </div>
+
+      <section className="space-y-3">
+        {!loading && rows.length === 0 && <div className="rounded-xl border border-slate-100 bg-white p-10 text-center text-sm text-slate-500">No medical history found.</div>}
+        {rows.map((record) => (
+          <article key={record.id} className="rounded-xl border border-slate-100 bg-white p-4">
+            <div className="mb-2 flex items-center justify-between">
+              <h2 className="inline-flex items-center gap-2 font-semibold text-slate-900"><History className="h-4 w-4" /> Visit #{record.id}</h2>
+              <p className="text-xs text-slate-500">{new Date(record.visit_date).toLocaleDateString()}</p>
+            </div>
+            <p className="text-sm text-slate-700">{record.diagnosis || 'General checkup'}</p>
+            <p className="mt-1 text-xs text-slate-500 inline-flex items-center gap-1"><Stethoscope className="h-3.5 w-3.5" /> Dr. {record.doctor_first_name || '-'} {record.doctor_last_name || ''} • {record.doctor_specialization || 'General'} • {record.department_name || '-'}</p>
+            {record.symptoms && <p className="mt-2 text-sm text-slate-600">Symptoms: {record.symptoms}</p>}
+            {record.treatment_plan && <p className="mt-1 text-sm text-slate-600">Treatment: {record.treatment_plan}</p>}
+            {record.notes && <p className="mt-1 text-sm text-slate-600">Notes: {record.notes}</p>}
+          </article>
+        ))}
+        {loading && <div className="rounded-xl border border-slate-100 bg-white p-10 text-center text-sm text-slate-500">Loading medical history...</div>}
+      </section>
     </div>
   );
 }
+

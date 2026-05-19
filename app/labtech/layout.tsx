@@ -3,6 +3,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { usePathname } from 'next/navigation';
+import LabTechProtected from '@/components/LabTechProtected';
 import {
   Beaker, Activity, Heart, Clock, Upload, CheckCircle2,
   Settings, Menu, Microscope, Bell, Search, User,
@@ -271,14 +272,15 @@ export default function TechnicianLayout({
   
   // Type-safe way to pass props to children
   const childrenWithProps = React.Children.map(children, (child) => {
-    if (React.isValidElement(child)) {
+    if (React.isValidElement<{ activeDept?: string }>(child)) {
       return React.cloneElement(child, { activeDept });
     }
     return child;
   });
   
   return (
-    <div className="min-h-screen bg-slate-50/50">
+    <LabTechProtected>
+      <div className="min-h-screen bg-slate-50/50">
       <TechnicianSidebar
         activeDept={activeDept}
         onDeptChange={handleDeptChange}
@@ -288,18 +290,19 @@ export default function TechnicianLayout({
         onMobileClose={() => setMobileSidebarOpen(false)}
       />
       
-      <div className={`transition-all duration-300 min-h-screen flex flex-col
-        ${!isMobile && (sidebarCollapsed ? 'lg:ml-16' : 'lg:ml-64')}
-      `}>
-        <TechnicianTopBar
-          onMenuClick={() => setMobileSidebarOpen(true)}
-          department={getDepartmentTitle()}
-          technicianName="Priya Patel"
-        />
-        <main className="flex-1">
-          {childrenWithProps}
-        </main>
+        <div className={`transition-all duration-300 min-h-screen flex flex-col
+          ${!isMobile && (sidebarCollapsed ? 'lg:ml-16' : 'lg:ml-64')}
+        `}>
+          <TechnicianTopBar
+            onMenuClick={() => setMobileSidebarOpen(true)}
+            department={getDepartmentTitle()}
+            technicianName="Priya Patel"
+          />
+          <main className="flex-1">
+            {childrenWithProps}
+          </main>
+        </div>
       </div>
-    </div>
+    </LabTechProtected>
   );
 }

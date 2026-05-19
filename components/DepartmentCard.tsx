@@ -27,6 +27,8 @@ export function DepartmentCard({ department, showDetails = false }: DepartmentCa
           </div>
         </div>
 
+        {/* trying fixed */}
+
         <p className="text-slate-600 text-sm mb-4 line-clamp-2">{department.description}</p>
 
         {showDetails && (

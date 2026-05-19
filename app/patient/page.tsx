@@ -1,305 +1,172 @@
 'use client';
 
-import PatientSidebar from '@/components/PatientSidebar';
-import { Pill, FileText, History, Calendar, AlertCircle, CheckCircle } from 'lucide-react';
 import Link from 'next/link';
+import { useEffect, useMemo, useState } from 'react';
+import { AlertCircle, Calendar, FileText, History, Pill } from 'lucide-react';
+import { api, ApiException } from '@/lib/api-client';
 
-// Define types for better type safety
-type Prescription = {
-  id: string;
-  doctorName: string;
-  doctorSpecialization: string;
-  dateIssued: string;
-  medicines: { name: string }[];
-};
-
-type LabReport = {
-  id: string;
-  testName: string;
-  category: string;
-  dateOfTest: string;
-  status: 'Normal' | 'Abnormal' | 'Critical';
-};
-
-type MedicalRecord = {
-  id: string;
-  visitDate: string;
-  doctorName: string;
-  department: string;
-  diagnosis: string;
-};
+interface PatientDashboardData {
+  patient: {
+    id: number;
+    first_name: string;
+    last_name: string;
+    email: string;
+  } | null;
+  appointments: Array<{
+    id: number;
+    scheduled_date: string;
+    scheduled_time: string;
+    status: string;
+    notes?: string | null;
+    department?: string | null;
+    first_name?: string;
+    last_name?: string;
+    reason?: string | null;
+  }>;
+  prescriptions: Array<{
+    id: number;
+    date_issued: string;
+    medicine_name: string;
+    dosage: string;
+  }>;
+  lab_tests: Array<{
+    id: number;
+    test_name: string;
+    status: string;
+    request_date: string;
+  }>;
+  medical_records: Array<{
+    id: number;
+    visit_date: string;
+    diagnosis?: string | null;
+  }>;
+}
 
 export default function PatientDashboard() {
-  const userName = 'John Sharma';
-  const activePrescriptions = 2;
-  const labReports = 5;
-  const appointments = 1;
-  const medicalVisits = 8;
+  const [data, setData] = useState<PatientDashboardData | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
-  // Sample data - you can replace this with actual data from your API
-  const recentPrescriptions: Prescription[] = [
-    {
-      id: '1',
-      doctorName: 'Dr. Sarah Johnson',
-      doctorSpecialization: 'Cardiologist',
-      dateIssued: '2024-02-15',
-      medicines: [
-        { name: 'Aspirin' },
-        { name: 'Lisinopril' },
-      ],
-    },
-    {
-      id: '2',
-      doctorName: 'Dr. Michael Chen',
-      doctorSpecialization: 'General Physician',
-      dateIssued: '2024-01-28',
-      medicines: [
-        { name: 'Amoxicillin' },
-        { name: 'Ibuprofen' },
-        { name: 'Cetirizine' },
-      ],
-    },
-  ];
+  useEffect(() => {
+    const load = async () => {
+      setLoading(true);
+      setError(null);
+      try {
+        const res = await api.get<PatientDashboardData>('/patient/dashboard');
+        setData((res.data ?? null) as PatientDashboardData | null);
+      } catch (err) {
+        setError(err instanceof ApiException ? err.message : 'Failed to load dashboard.');
+      } finally {
+        setLoading(false);
+      }
+    };
+    void load();
+  }, []);
 
-  const recentReports: LabReport[] = [
-    {
-      id: '1',
-      testName: 'Complete Blood Count (CBC)',
-      category: 'Hematology',
-      dateOfTest: '2024-02-10',
-      status: 'Normal',
-    },
-    {
-      id: '2',
-      testName: 'Lipid Profile',
-      category: 'Biochemistry',
-      dateOfTest: '2024-02-05',
-      status: 'Abnormal',
-    },
-    {
-      id: '3',
-      testName: 'Thyroid Function Test',
-      category: 'Endocrinology',
-      dateOfTest: '2024-01-20',
-      status: 'Normal',
-    },
-  ];
-
-  const recentHistory: MedicalRecord[] = [
-    {
-      id: '1',
-      visitDate: '2024-02-15',
-      doctorName: 'Dr. Sarah Johnson',
-      department: 'Cardiology',
-      diagnosis: 'Hypertension - Stable',
-    },
-    {
-      id: '2',
-      visitDate: '2024-01-28',
-      doctorName: 'Dr. Michael Chen',
-      department: 'General Medicine',
-      diagnosis: 'Upper Respiratory Infection',
-    },
-    {
-      id: '3',
-      visitDate: '2024-01-10',
-      doctorName: 'Dr. Emily Rodriguez',
-      department: 'Endocrinology',
-      diagnosis: 'Hypothyroidism - Under control',
-    },
-  ];
+  const stats = useMemo(() => {
+    if (!data) return { appointments: 0, activeRx: 0, labs: 0, visits: 0 };
+    return {
+      appointments: data.appointments.length,
+      activeRx: new Set(data.prescriptions.map((p) => p.id)).size,
+      labs: new Set(data.lab_tests.map((l) => l.id)).size,
+      visits: data.medical_records.length,
+    };
+  }, [data]);
 
   return (
-    <div className="flex min-h-screen">
-      <PatientSidebar />
-      <main className="flex-1 ml-64 p-8 bg-gradient-to-br from-emerald-50 to-green-50">
-        <div className="max-w-7xl mx-auto">
-          {/* Header */}
-          <div className="mb-8">
-            <h1 className="text-4xl font-bold text-slate-900">Welcome, {userName}!</h1>
-            <p className="text-slate-600 mt-2">Your health information at a glance</p>
+    <div className="mx-auto max-w-7xl space-y-6 p-4 sm:p-6">
+      <div>
+        <h1 className="text-2xl font-bold text-slate-900">
+          {data?.patient ? `Welcome, ${data.patient.first_name}` : 'Patient Dashboard'}
+        </h1>
+        <p className="text-sm text-slate-500">Your appointments, prescriptions, reports, and history in one place.</p>
+      </div>
+
+      {error && <div className="rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">{error}</div>}
+
+      <div className="grid grid-cols-2 gap-4 lg:grid-cols-4">
+        <div className="rounded-xl border border-slate-100 bg-white p-4"><p className="text-xs text-slate-500">Appointments</p><p className="text-2xl font-bold">{stats.appointments}</p></div>
+        <div className="rounded-xl border border-slate-100 bg-white p-4"><p className="text-xs text-slate-500">Prescriptions</p><p className="text-2xl font-bold">{stats.activeRx}</p></div>
+        <div className="rounded-xl border border-slate-100 bg-white p-4"><p className="text-xs text-slate-500">Lab Tests</p><p className="text-2xl font-bold">{stats.labs}</p></div>
+        <div className="rounded-xl border border-slate-100 bg-white p-4"><p className="text-xs text-slate-500">Recent Visits</p><p className="text-2xl font-bold">{stats.visits}</p></div>
+      </div>
+
+      <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
+        <section className="rounded-xl border border-slate-100 bg-white p-4">
+          <div className="mb-3 flex items-center justify-between">
+            <h2 className="flex items-center gap-2 font-semibold text-slate-900"><Calendar className="h-4 w-4 text-blue-600" /> Upcoming Appointments</h2>
+            <Link href="/patient/appointments-view" className="text-xs font-semibold text-blue-600">View all</Link>
           </div>
-
-          {/* Quick Stats */}
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
-            <div className="bg-white rounded-xl shadow-sm p-6 border-l-4 border-emerald-500">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-slate-600 text-sm">Active Prescriptions</p>
-                  <p className="text-3xl font-bold text-slate-900">{activePrescriptions}</p>
-                </div>
-                <div className="bg-emerald-100 p-3 rounded-lg">
-                  <Pill className="w-6 h-6 text-emerald-600" />
-                </div>
+          <div className="space-y-2">
+            {(data?.appointments || []).slice(0, 4).map((apt) => (
+              <div key={apt.id} className="rounded-lg border border-slate-100 p-3">
+                <p className="text-sm font-medium text-slate-900">
+                  {apt.department || 'General'} | {apt.status === 'completed' ? 'discharged' : apt.status}
+                </p>
+                <p className="text-xs text-slate-500">{apt.scheduled_date} {apt.scheduled_time}</p>
+                {apt.notes && <p className="mt-1 text-xs text-slate-500">{apt.notes}</p>}
               </div>
-            </div>
-
-            <div className="bg-white rounded-xl shadow-sm p-6 border-l-4 border-blue-500">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-slate-600 text-sm">Lab Reports</p>
-                  <p className="text-3xl font-bold text-slate-900">{labReports}</p>
-                </div>
-                <div className="bg-blue-100 p-3 rounded-lg">
-                  <FileText className="w-6 h-6 text-blue-600" />
-                </div>
-              </div>
-            </div>
-
-            <div className="bg-white rounded-xl shadow-sm p-6 border-l-4 border-purple-500">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-slate-600 text-sm">Medical Visits</p>
-                  <p className="text-3xl font-bold text-slate-900">{medicalVisits}</p>
-                </div>
-                <div className="bg-purple-100 p-3 rounded-lg">
-                  <History className="w-6 h-6 text-purple-600" />
-                </div>
-              </div>
-            </div>
-
-            <div className="bg-white rounded-xl shadow-sm p-6 border-l-4 border-orange-500">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-slate-600 text-sm">Upcoming Appointments</p>
-                  <p className="text-3xl font-bold text-slate-900">{appointments}</p>
-                </div>
-                <div className="bg-orange-100 p-3 rounded-lg">
-                  <Calendar className="w-6 h-6 text-orange-600" />
-                </div>
-              </div>
-            </div>
+            ))}
+            {!loading && (data?.appointments || []).length === 0 && <p className="text-sm text-slate-500">No appointments yet.</p>}
           </div>
+        </section>
 
-          {/* Main Content */}
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-            {/* Recent Prescriptions */}
-            <div className="bg-white rounded-xl shadow-sm">
-              <div className="p-6 border-b border-gray-200 flex items-center justify-between">
-                <h2 className="text-xl font-bold text-gray-900 flex items-center gap-2">
-                  <Pill className="w-5 h-5 text-emerald-600" />
-                  Recent Prescriptions
-                </h2>
-                <Link href="/patient/prescriptions" className="text-emerald-600 hover:text-emerald-700 font-medium text-sm">
-                  View All
-                </Link>
-              </div>
-              <div className="divide-y divide-gray-200">
-                {recentPrescriptions.length > 0 ? (
-                  recentPrescriptions.map((prescription) => (
-                    <div key={prescription.id} className="p-6 hover:bg-gray-50 transition">
-                      <p className="font-semibold text-gray-900">{prescription.doctorName}</p>
-                      <p className="text-sm text-gray-600">{prescription.doctorSpecialization}</p>
-                      <p className="text-xs text-gray-500 mt-1">Issued: {prescription.dateIssued}</p>
-                      <div className="mt-3 flex flex-wrap gap-1">
-                        {prescription.medicines.slice(0, 2).map((med, idx) => (
-                          <span key={idx} className="inline-block bg-emerald-100 text-emerald-800 text-xs px-2 py-1 rounded">
-                            {med.name}
-                          </span>
-                        ))}
-                        {prescription.medicines.length > 2 && (
-                          <span className="inline-block bg-gray-100 text-gray-600 text-xs px-2 py-1 rounded">
-                            +{prescription.medicines.length - 2} more
-                          </span>
-                        )}
-                      </div>
-                    </div>
-                  ))
-                ) : (
-                  <div className="p-6 text-gray-500 text-center">No prescriptions available</div>
-                )}
-              </div>
-            </div>
-
-            {/* Recent Lab Reports */}
-            <div className="bg-white rounded-xl shadow-sm">
-              <div className="p-6 border-b border-gray-200 flex items-center justify-between">
-                <h2 className="text-xl font-bold text-gray-900 flex items-center gap-2">
-                  <FileText className="w-5 h-5 text-blue-600" />
-                  Recent Lab Reports
-                </h2>
-                <Link href="/patient/lab-reports" className="text-emerald-600 hover:text-emerald-700 font-medium text-sm">
-                  View All
-                </Link>
-              </div>
-              <div className="divide-y divide-gray-200">
-                {recentReports.length > 0 ? (
-                  recentReports.map((report) => (
-                    <div key={report.id} className="p-6 hover:bg-gray-50 transition">
-                      <div className="flex items-start justify-between">
-                        <div className="flex-1">
-                          <p className="font-semibold text-gray-900">{report.testName}</p>
-                          <p className="text-sm text-gray-600">{report.category}</p>
-                          <p className="text-xs text-gray-500 mt-1">Tested: {report.dateOfTest}</p>
-                        </div>
-                        <div className="flex items-center gap-2 ml-4">
-                          {report.status === 'Normal' ? (
-                            <CheckCircle className="w-5 h-5 text-green-600" />
-                          ) : (
-                            <AlertCircle className="w-5 h-5 text-orange-600" />
-                          )}
-                          <span className={`text-xs font-semibold px-2 py-1 rounded ${
-                            report.status === 'Normal' 
-                              ? 'bg-green-100 text-green-800'
-                              : 'bg-orange-100 text-orange-800'
-                          }`}>
-                            {report.status}
-                          </span>
-                        </div>
-                      </div>
-                    </div>
-                  ))
-                ) : (
-                  <div className="p-6 text-gray-500 text-center">No lab reports available</div>
-                )}
-              </div>
-            </div>
-
-            {/* Recent Medical History */}
-            <div className="bg-white rounded-xl shadow-sm lg:col-span-2">
-              <div className="p-6 border-b border-gray-200 flex items-center justify-between">
-                <h2 className="text-xl font-bold text-gray-900 flex items-center gap-2">
-                  <History className="w-5 h-5 text-purple-600" />
-                  Recent Medical History
-                </h2>
-                <Link href="/patient/medical-history" className="text-emerald-600 hover:text-emerald-700 font-medium text-sm">
-                  View All
-                </Link>
-              </div>
-              <div className="overflow-x-auto">
-                <table className="w-full">
-                  <thead>
-                    <tr className="border-b border-gray-200 bg-gray-50">
-                      <th className="px-6 py-3 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">Date</th>
-                      <th className="px-6 py-3 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">Doctor</th>
-                      <th className="px-6 py-3 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">Department</th>
-                      <th className="px-6 py-3 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">Diagnosis</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {recentHistory.length > 0 ? (
-                      recentHistory.map((record) => (
-                        <tr key={record.id} className="border-b border-gray-200 hover:bg-gray-50 transition">
-                          <td className="px-6 py-4 text-sm text-gray-900">{record.visitDate}</td>
-                          <td className="px-6 py-4 text-sm text-gray-900">{record.doctorName}</td>
-                          <td className="px-6 py-4 text-sm text-gray-600">{record.department}</td>
-                          <td className="px-6 py-4 text-sm text-gray-600">{record.diagnosis}</td>
-                        </tr>
-                      ))
-                    ) : (
-                      <tr>
-                        <td colSpan={4} className="px-6 py-4 text-center text-gray-500">
-                          No medical history available
-                        </td>
-                      </tr>
-                    )}
-                  </tbody>
-                </table>
-              </div>
-            </div>
+        <section className="rounded-xl border border-slate-100 bg-white p-4">
+          <div className="mb-3 flex items-center justify-between">
+            <h2 className="flex items-center gap-2 font-semibold text-slate-900"><Pill className="h-4 w-4 text-emerald-600" /> Latest Prescriptions</h2>
+            <Link href="/patient/prescriptions-view" className="text-xs font-semibold text-blue-600">View all</Link>
           </div>
+          <div className="space-y-2">
+            {(data?.prescriptions || []).slice(0, 4).map((rx, idx) => (
+              <div key={`${rx.id}-${idx}`} className="rounded-lg border border-slate-100 p-3">
+                <p className="text-sm font-medium text-slate-900">{rx.medicine_name} ({rx.dosage})</p>
+                <p className="text-xs text-slate-500">Issued: {new Date(rx.date_issued).toLocaleDateString()}</p>
+              </div>
+            ))}
+            {!loading && (data?.prescriptions || []).length === 0 && <p className="text-sm text-slate-500">No prescriptions available.</p>}
+          </div>
+        </section>
+      </div>
+
+      <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
+        <section className="rounded-xl border border-slate-100 bg-white p-4">
+          <div className="mb-3 flex items-center justify-between">
+            <h2 className="flex items-center gap-2 font-semibold text-slate-900"><FileText className="h-4 w-4 text-indigo-600" /> Lab Tests</h2>
+            <Link href="/patient/lab-reports-view" className="text-xs font-semibold text-blue-600">View all</Link>
+          </div>
+          <div className="space-y-2">
+            {(data?.lab_tests || []).slice(0, 4).map((lab) => (
+              <div key={lab.id} className="rounded-lg border border-slate-100 p-3">
+                <p className="text-sm font-medium text-slate-900">{lab.test_name}</p>
+                <p className="text-xs text-slate-500">{lab.status} | {new Date(lab.request_date).toLocaleDateString()}</p>
+              </div>
+            ))}
+            {!loading && (data?.lab_tests || []).length === 0 && <p className="text-sm text-slate-500">No lab tests yet.</p>}
+          </div>
+        </section>
+
+        <section className="rounded-xl border border-slate-100 bg-white p-4">
+          <div className="mb-3 flex items-center justify-between">
+            <h2 className="flex items-center gap-2 font-semibold text-slate-900"><History className="h-4 w-4 text-purple-600" /> Medical History</h2>
+            <Link href="/patient/medical-history-view" className="text-xs font-semibold text-blue-600">View all</Link>
+          </div>
+          <div className="space-y-2">
+            {(data?.medical_records || []).slice(0, 4).map((record) => (
+              <div key={record.id} className="rounded-lg border border-slate-100 p-3">
+                <p className="text-sm font-medium text-slate-900">{record.diagnosis || 'Medical visit'}</p>
+                <p className="text-xs text-slate-500">{new Date(record.visit_date).toLocaleDateString()}</p>
+              </div>
+            ))}
+            {!loading && (data?.medical_records || []).length === 0 && <p className="text-sm text-slate-500">No medical history records.</p>}
+          </div>
+        </section>
+      </div>
+
+      {loading && (
+        <div className="rounded-xl border border-slate-100 bg-white p-10 text-center text-sm text-slate-500">
+          <span className="inline-flex items-center gap-2"><AlertCircle className="h-4 w-4 animate-pulse" /> Loading dashboard...</span>
         </div>
-      </main>
+      )}
     </div>
   );
 }

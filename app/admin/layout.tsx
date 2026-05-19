@@ -3,7 +3,9 @@
 
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
-import { usePathname } from 'next/navigation';
+import { usePathname, useRouter } from 'next/navigation';
+import AdminProtected from '@/components/AdminProtected';
+import { useAuth } from '@/context/AuthContext';
 import {
   LayoutDashboard, Users, Shield, Activity, Settings, LogOut,
   Bell, Search, Menu, Heart, Calendar, FlaskConical, Stethoscope,
@@ -19,6 +21,7 @@ const navigation = {
   ],
   management: [
     { href: '/admin/staff-roles', label: 'Staff & Roles', icon: Shield, exact: false },
+    { href: '/admin/doctors', label: 'Doctors', icon: Stethoscope, exact: false },
     { href: '/admin/patients', label: 'Patients', icon: Users, exact: false },
     { href: '/admin/appointments', label: 'Appointments', icon: Calendar, exact: false },
     { href: '/admin/lab-tests', label: 'Lab Tests', icon: FlaskConical, exact: false },
@@ -29,6 +32,7 @@ const navigation = {
     { href: '/admin/activity', label: 'Activity Logs', icon: Activity, exact: false },
   ],
   system: [
+    { href: '/admin/hero-banners', label: 'Hero Banners', icon: FileText, exact: false },
     { href: '/admin/settings', label: 'Settings', icon: Settings, exact: false },
   ],
 };
@@ -40,11 +44,21 @@ function Sidebar({ collapsed, onToggle, mobileOpen, onMobileClose }: {
   onMobileClose: () => void;
 }) {
   const pathname = usePathname();
+  const router = useRouter();
+  const { logout, user } = useAuth();
 
   const isActive = (href: string, exact: boolean = false) => {
     if (exact) return pathname === href;
     return pathname.startsWith(href);
   };
+
+  const displayName = user?.name || [user?.first_name, user?.last_name].filter(Boolean).join(' ') || 'Hospital Admin';
+  const initials = displayName
+    .split(' ')
+    .map((part) => part[0])
+    .join('')
+    .slice(0, 2)
+    .toUpperCase();
 
   return (
     <>
@@ -71,7 +85,7 @@ function Sidebar({ collapsed, onToggle, mobileOpen, onMobileClose }: {
             </div>
             {!collapsed && (
               <div>
-                <p className="text-sm font-bold text-slate-900 leading-none">MediCare</p>
+                <p className="text-sm font-bold text-slate-900 leading-none">Mefigure Siddhi Vadanta</p>
                 <p className="text-xs text-slate-400 leading-none mt-0.5">Admin Portal</p>
               </div>
             )}
@@ -126,18 +140,24 @@ function Sidebar({ collapsed, onToggle, mobileOpen, onMobileClose }: {
         <div className={`border-t border-slate-100 p-3 ${collapsed ? 'flex justify-center' : ''}`}>
           {collapsed ? (
             <div className="w-8 h-8 rounded-full bg-gradient-to-br from-blue-400 to-blue-600 flex items-center justify-center text-white text-xs font-bold">
-              HA
+              {initials || 'HA'}
             </div>
           ) : (
             <div className="flex items-center gap-3">
               <div className="w-8 h-8 rounded-full bg-gradient-to-br from-blue-400 to-blue-600 flex items-center justify-center text-white text-xs font-bold flex-shrink-0">
-                HA
+                {initials || 'HA'}
               </div>
               <div className="flex-1 min-w-0">
-                <p className="text-xs font-semibold text-slate-900 truncate">Hospital Admin</p>
-                <p className="text-xs text-slate-400 truncate">admin@hospital.com</p>
+                <p className="text-xs font-semibold text-slate-900 truncate">{displayName}</p>
+                <p className="text-xs text-slate-400 truncate">{user?.email || 'admin@hospital.com'}</p>
               </div>
-              <button className="p-1 hover:bg-slate-50 rounded-lg transition-colors text-slate-400">
+              <button
+                onClick={() => {
+                  logout();
+                  router.push('/adminLogin');
+                }}
+                className="p-1 hover:bg-slate-50 rounded-lg transition-colors text-slate-400"
+              >
                 <LogOut className="w-3.5 h-3.5" />
               </button>
             </div>
@@ -210,7 +230,8 @@ export default function AdminLayout({
   }, []);
 
   return (
-    <div className="min-h-screen bg-slate-50/50">
+    <AdminProtected>
+      <div className="min-h-screen bg-slate-50/50">
       <Sidebar 
         collapsed={sidebarCollapsed}
         onToggle={() => setSidebarCollapsed(!sidebarCollapsed)}
@@ -218,14 +239,16 @@ export default function AdminLayout({
         onMobileClose={() => setMobileSidebarOpen(false)}
       />
       
-      <div className={`transition-all duration-300 min-h-screen flex flex-col
-        ${!isMobile && (sidebarCollapsed ? 'lg:ml-16' : 'lg:ml-64')}
-      `}>
-        <TopBar onMenuClick={() => setMobileSidebarOpen(true)} />
-        <main className="flex-1">
-          {children}
-        </main>
+        <div className={`transition-all duration-300 min-h-screen flex flex-col
+          ${!isMobile && (sidebarCollapsed ? 'lg:ml-16' : 'lg:ml-64')}
+        `}>
+          <TopBar onMenuClick={() => setMobileSidebarOpen(true)} />
+          <main className="flex-1">
+            {children}
+          </main>
+        </div>
       </div>
-    </div>
+    </AdminProtected>
   );
 }
+

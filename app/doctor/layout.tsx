@@ -3,12 +3,14 @@
 
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
-import { usePathname } from 'next/navigation';
+import { usePathname, useRouter } from 'next/navigation';
+import DoctorProtected from '@/components/DoctorProtected';
+import { useAuth } from '@/context/AuthContext';
 import {
   LayoutDashboard, Users, FileText, FlaskConical, Calendar,
   Heart, MessageSquare, Settings, LogOut, Bell, Search,
-  Menu, Stethoscope, ClipboardList, Pill, Activity,
-  ChevronDown, User, Clock, Star, TrendingUp
+  Menu, Stethoscope, ClipboardList, Pill,
+  ChevronDown, User, Clock
 } from 'lucide-react';
 
 // Doctor Navigation
@@ -34,11 +36,14 @@ const doctorNavigation = {
   ],
 };
 
-function DoctorSidebar({ collapsed, onToggle, mobileOpen, onMobileClose }: { 
+function DoctorSidebar({ collapsed, onToggle, mobileOpen, onMobileClose, doctorName, doctorDept, onLogout }: {
   collapsed: boolean; 
   onToggle: () => void; 
   mobileOpen: boolean; 
   onMobileClose: () => void;
+  doctorName: string;
+  doctorDept: string;
+  onLogout: () => void;
 }) {
   const pathname = usePathname();
 
@@ -71,16 +76,10 @@ function DoctorSidebar({ collapsed, onToggle, mobileOpen, onMobileClose }: {
             {!collapsed && (
               <div>
                 <p className="text-sm font-bold leading-none">Doctor Portal</p>
-                <p className="text-xs text-white/70 leading-none mt-0.5">Dr. Rajesh Kumar</p>
+                <p className="text-xs text-white/70 leading-none mt-0.5 truncate">{doctorName}</p>
               </div>
             )}
           </div>
-          <button
-            onClick={onToggle}
-            className={`p-1.5 rounded-lg hover:bg-white/10 transition-colors ${collapsed ? 'hidden' : ''}`}
-          >
-            <Menu className="w-4 h-4" />
-          </button>
         </div>
 
         {/* Navigation */}
@@ -130,10 +129,15 @@ function DoctorSidebar({ collapsed, onToggle, mobileOpen, onMobileClose }: {
                 DR
               </div>
               <div className="flex-1 min-w-0">
-                <p className="text-sm font-semibold text-white truncate">Dr. Rajesh Kumar</p>
-                <p className="text-xs text-white/60 truncate">Cardiology</p>
+                <p className="text-sm font-semibold text-white truncate">{doctorName}</p>
+                <p className="text-xs text-white/60 truncate">{doctorDept}</p>
               </div>
-              <button className="p-1 hover:bg-white/10 rounded-lg transition-colors">
+              <button
+                onClick={onLogout}
+                className="p-1 hover:bg-white/10 rounded-lg transition-colors"
+                aria-label="Logout"
+                title="Logout"
+              >
                 <LogOut className="w-4 h-4 text-white/70" />
               </button>
             </div>
@@ -144,17 +148,40 @@ function DoctorSidebar({ collapsed, onToggle, mobileOpen, onMobileClose }: {
   );
 }
 
-function DoctorTopBar({ onMenuClick }: { onMenuClick: () => void }) {
+function DoctorTopBar({
+  onMenuClick,
+  onToggleSidebar,
+  isMobile,
+  doctorName,
+  doctorDept,
+}: {
+  onMenuClick: () => void;
+  onToggleSidebar: () => void;
+  isMobile: boolean;
+  doctorName: string;
+  doctorDept: string;
+}) {
   const [notifications] = useState(3);
   
   return (
     <header className="h-16 bg-white border-b border-slate-100 flex items-center px-4 sm:px-6 gap-3 sm:gap-4 sticky top-0 z-30">
-      <button 
-        onClick={onMenuClick}
-        className="lg:hidden p-2 hover:bg-slate-50 rounded-lg transition-colors text-slate-500"
-      >
-        <Menu className="w-5 h-5" />
-      </button>
+      {isMobile ? (
+        <button
+          onClick={onMenuClick}
+          className="lg:hidden p-2 hover:bg-slate-50 rounded-lg transition-colors text-slate-500"
+          aria-label="Open menu"
+        >
+          <Menu className="w-5 h-5" />
+        </button>
+      ) : (
+        <button
+          onClick={onToggleSidebar}
+          className="hidden lg:inline-flex p-2 hover:bg-slate-50 rounded-lg transition-colors text-slate-500"
+          aria-label="Toggle sidebar"
+        >
+          <Menu className="w-5 h-5" />
+        </button>
+      )}
       
       <div className="flex-1">
         <div className="relative max-w-full sm:max-w-md">
@@ -179,8 +206,8 @@ function DoctorTopBar({ onMenuClick }: { onMenuClick: () => void }) {
             DR
           </div>
           <div className="text-left">
-            <p className="text-xs font-semibold text-slate-900">Dr. Rajesh Kumar</p>
-            <p className="text-xs text-slate-500">Cardiologist</p>
+            <p className="text-xs font-semibold text-slate-900 truncate max-w-[160px]">{doctorName}</p>
+            <p className="text-xs text-slate-500 truncate max-w-[160px]">{doctorDept}</p>
           </div>
           <ChevronDown className="w-4 h-4 text-slate-400" />
         </div>
@@ -194,9 +221,18 @@ export default function DoctorLayout({
 }: {
   children: React.ReactNode;
 }) {
+  const router = useRouter();
+  const { user, logout } = useAuth();
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const [mobileSidebarOpen, setMobileSidebarOpen] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
+  const doctorName = user?.name || [user?.first_name, user?.last_name].filter(Boolean).join(' ') || 'Doctor';
+  const doctorDept = user?.department || 'Department not set';
+  const doctorMeta = user?.specialization
+    ? (user?.years_of_experience != null
+      ? `${user.specialization} • ${user.years_of_experience} yrs exp`
+      : user.specialization)
+    : (user?.years_of_experience != null ? `${user.years_of_experience} yrs exp` : 'Doctor');
 
   useEffect(() => {
     const checkMobile = () => {
@@ -211,23 +247,39 @@ export default function DoctorLayout({
     return () => window.removeEventListener('resize', checkMobile);
   }, []);
 
+  const handleLogout = () => {
+    logout();
+    router.push('/doctorLogin');
+  };
+
   return (
-    <div className="min-h-screen bg-slate-50">
+    <DoctorProtected>
+      <div className="min-h-screen bg-slate-50">
       <DoctorSidebar 
         collapsed={sidebarCollapsed}
         onToggle={() => setSidebarCollapsed(!sidebarCollapsed)}
         mobileOpen={mobileSidebarOpen}
         onMobileClose={() => setMobileSidebarOpen(false)}
+        doctorName={doctorName}
+        doctorDept={doctorDept}
+        onLogout={handleLogout}
       />
       
-      <div className={`transition-all duration-300 min-h-screen flex flex-col
-        ${!isMobile && (sidebarCollapsed ? 'lg:ml-16' : 'lg:ml-64')}
-      `}>
-        <DoctorTopBar onMenuClick={() => setMobileSidebarOpen(true)} />
-        <main className="flex-1">
-          {children}
-        </main>
+        <div className={`transition-all duration-300 min-h-screen flex flex-col
+          ${!isMobile && (sidebarCollapsed ? 'lg:ml-16' : 'lg:ml-64')}
+        `}>
+          <DoctorTopBar
+            onMenuClick={() => setMobileSidebarOpen(true)}
+            onToggleSidebar={() => setSidebarCollapsed((v) => !v)}
+            isMobile={isMobile}
+            doctorName={doctorName}
+            doctorDept={doctorMeta}
+          />
+          <main className="flex-1">
+            {children}
+          </main>
+        </div>
       </div>
-    </div>
+    </DoctorProtected>
   );
 }
