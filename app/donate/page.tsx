@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 
@@ -21,7 +21,7 @@ import { Autoplay, Pagination } from "swiper/modules";
 import { Navbar } from "@/components/Navbar";
 import { Footer } from "@/components/Footer";
 import { ApiException } from "@/lib/api-client";
-import { donationApi, type DonationCampaign } from "@/lib/donation-api";
+import { donationApi } from "@/lib/donation-api";
 
 declare global {
   interface Window {
@@ -31,12 +31,6 @@ declare global {
 
 export default function DonationPage() {
   const [customAmount, setCustomAmount] = useState("");
-  const [donationType, setDonationType] = useState<"one-time" | "monthly">(
-    "one-time",
-  );
-  const [campaigns, setCampaigns] = useState<DonationCampaign[]>([]);
-  const [selectedCampaignId, setSelectedCampaignId] = useState<number | null>(null);
-  const [isLoadingCampaigns, setIsLoadingCampaigns] = useState(true);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitMessage, setSubmitMessage] = useState("");
   const [submitError, setSubmitError] = useState("");
@@ -53,38 +47,6 @@ export default function DonationPage() {
     anonymous: false,
     taxBenefit: true,
   });
-
-  useEffect(() => {
-    let isMounted = true;
-
-    const loadCampaigns = async () => {
-      try {
-        setIsLoadingCampaigns(true);
-        const response = await donationApi.listActiveCampaigns();
-        const activeCampaigns = response.data ?? [];
-
-        if (!isMounted) return;
-
-        setCampaigns(activeCampaigns);
-        setSelectedCampaignId(activeCampaigns[0]?.id ?? null);
-      } catch (err) {
-        if (!isMounted) return;
-        setSubmitError(
-          err instanceof ApiException
-            ? err.message
-            : "Unable to load donation campaigns right now.",
-        );
-      } finally {
-        if (isMounted) setIsLoadingCampaigns(false);
-      }
-    };
-
-    loadCampaigns();
-
-    return () => {
-      isMounted = false;
-    };
-  }, []);
 
   const handleCustomAmountChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value;
@@ -123,18 +85,12 @@ export default function DonationPage() {
 
     const amount = Number(customAmount);
 
-    if (!selectedCampaignId) {
-      setSubmitError("Please select a donation campaign.");
-      return;
-    }
-
     if (!amount || Number.isNaN(amount) || amount <= 0) {
       setSubmitError("Please enter a valid donation amount.");
       return;
     }
 
     const donorDetails = [
-      `Type: ${donationType}`,
       formData.fullName ? `Name: ${formData.fullName}` : "",
       formData.email ? `Email: ${formData.email}` : "",
       formData.phone ? `Phone: ${formData.phone}` : "",
@@ -146,7 +102,7 @@ export default function DonationPage() {
 
     try {
       setIsSubmitting(true);
-      const response = await donationApi.donate(selectedCampaignId, {
+      const response = await donationApi.donate({
         amount,
         currency: "INR",
         payment_method: "other",
@@ -169,7 +125,7 @@ export default function DonationPage() {
         amount: init.amount,
         currency: init.currency,
         name: "HospitalMS",
-        description: `Donation - ${init.campaign_title}`,
+        description: "Donation - General",
         order_id: init.razorpay_order_id,
         prefill: {
           name: formData.fullName,
@@ -348,62 +304,11 @@ const impacts = [
                     Donation Amount
                   </h2>
                   <p className="text-slate-500 text-sm mt-1">
-                    Choose how you'd like to donate
+                    Enter your donation details
                   </p>
                 </div>
 
                 <form onSubmit={handleSubmit} className="p-6 space-y-6">
-                  {/* Campaign Selection */}
-                  <div>
-                    <label className="block text-sm font-medium text-slate-700 mb-2">
-                      Donation Campaign
-                    </label>
-                    <select
-                      value={selectedCampaignId ?? ""}
-                      onChange={(event) => setSelectedCampaignId(Number(event.target.value))}
-                      disabled={isLoadingCampaigns || campaigns.length === 0}
-                      className="w-full px-4 py-2 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-400 disabled:bg-slate-100 disabled:text-slate-500"
-                    >
-                      {isLoadingCampaigns ? (
-                        <option>Loading campaigns...</option>
-                      ) : campaigns.length > 0 ? (
-                        campaigns.map((campaign) => (
-                          <option key={campaign.id} value={campaign.id}>
-                            {campaign.title}
-                          </option>
-                        ))
-                      ) : (
-                        <option>No active campaigns available</option>
-                      )}
-                    </select>
-                  </div>
-
-                  {/* Donation Type Toggle */}
-                  <div className="flex gap-3 p-1 bg-slate-100 rounded-lg">
-                    <button
-                      type="button"
-                      onClick={() => setDonationType("one-time")}
-                      className={`flex-1 px-4 py-2 rounded-lg font-medium transition-colors ${
-                        donationType === "one-time"
-                          ? "bg-white text-emerald-600 shadow-sm"
-                          : "text-slate-600 hover:text-slate-900"
-                      }`}
-                    >
-                      One Time
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => setDonationType("monthly")}
-                      className={`flex-1 px-4 py-2 rounded-lg font-medium transition-colors ${
-                        donationType === "monthly"
-                          ? "bg-white text-emerald-600 shadow-sm"
-                          : "text-slate-600 hover:text-slate-900"
-                      }`}
-                    >
-                      Monthly
-                    </button>
-                  </div>
-
                   <div className="rounded-lg border border-emerald-100 bg-emerald-50 px-4 py-3 text-sm text-emerald-800">
                     Secure payment is powered by Razorpay (UPI, Card, NetBanking, Wallet).
                   </div>
@@ -411,7 +316,7 @@ const impacts = [
                   {/* Custom Amount */}
                   <div>
                     <label className="block text-sm font-medium text-slate-700 mb-3">
-                      Enter Donation Amount (₹)
+                      Enter Donation Amount (₹) *
                     </label>
                     <div className="relative">
                       <span className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-500">
@@ -423,6 +328,7 @@ const impacts = [
                         value={customAmount}
                         onChange={handleCustomAmountChange}
                         min={1}
+                        required
                         className="w-full pl-8 pr-4 py-2 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-400"
                       />
                     </div>
@@ -592,7 +498,7 @@ const impacts = [
                   {/* Submit Button */}
                   <button
                     type="submit"
-                    disabled={isSubmitting || isLoadingCampaigns || !selectedCampaignId}
+                    disabled={isSubmitting}
                     className="w-full bg-gradient-to-r from-emerald-600 to-teal-600 text-white py-3 rounded-lg font-semibold hover:from-emerald-700 hover:to-teal-700 transition-all disabled:opacity-60 disabled:cursor-not-allowed"
                   >
                     <Heart className="w-4 h-4 inline mr-2" />

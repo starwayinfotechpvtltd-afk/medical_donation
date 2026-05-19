@@ -44,7 +44,7 @@ export interface DonationInitResponse {
   razorpay_order_id: string;
   amount: number;
   currency: string;
-  campaign_title: string;
+  purpose: string;
 }
 
 export interface DonationStats {
@@ -68,20 +68,12 @@ export interface RecentDonation {
   donor_email?: string | null;
   donor_phone?: string | null;
   transaction_ref?: string | null;
-  campaign_title: string;
+  purpose: string;
 }
 
 export const donationApi = {
-  listActiveCampaigns() {
-    return api.get<DonationCampaign[]>('/donations', {
-      status: 'active',
-      limit: 20,
-      page: 1,
-    });
-  },
-
-  donate(campaignId: number, payload: DonationPayload) {
-    return api.post<DonationInitResponse>(`/donations/${campaignId}/donate`, payload);
+  donate(payload: DonationPayload) {
+    return api.post<DonationInitResponse>('/donations/donate', payload);
   },
 
   verifyPayment(payload: { razorpay_order_id: string; razorpay_payment_id: string; razorpay_signature: string }) {

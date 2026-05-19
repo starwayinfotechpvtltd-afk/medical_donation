@@ -112,7 +112,7 @@ export default function AdminDashboardPage() {
                 <tr key={row.id} className="border-t border-slate-100">
                   <td className="py-2">{row.is_anonymous ? 'Anonymous' : (row.donor_name || 'Unnamed')}</td>
                   <td className="py-2">{row.is_anonymous ? '-' : (row.donor_email || '-')}</td>
-                  <td className="py-2">{row.campaign_title}</td>
+                  <td className="py-2">{row.purpose}</td>
                   <td className="py-2">₹{Number(row.amount).toLocaleString()}</td>
                   <td className="py-2">{new Date(row.created_at).toLocaleString()}</td>
                 </tr>
