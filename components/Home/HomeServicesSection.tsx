@@ -141,8 +141,8 @@ export default function HomeServicesSection() {
   ];
 
   return (
-    <section className="w-full py-20 bg-green-100/50 overflow-hidden">
-      <div className="max-w-[70%] mx-auto relative">
+    <section className="w-full py-16 bg-green-100/50 overflow-hidden">
+      <div className="max-w-[90%] lg:max-w-[90%] xl:max-w-[80%] 2xl:max-w-[75%] mx-auto relative">
 
         {/* Header */}
         <motion.div

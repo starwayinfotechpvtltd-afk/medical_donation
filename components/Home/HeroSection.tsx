@@ -148,7 +148,7 @@ export default function HeroSection() {
             </div>
 
             {/* CTA Row */}
-            <div className="mt-8 flex flex-col sm:flex-row sm:items-center gap-5">
+            <div className="mt-5 lg:mt-8 flex flex-col sm:flex-row sm:items-center gap-3">
               <Link
                 href="/appointment"
                 className="bg-green-600 hover:bg-green-700 text-white px-7 py-3 rounded-xl font-semibold text-sm transition shadow-md inline-block text-center"

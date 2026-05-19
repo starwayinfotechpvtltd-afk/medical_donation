@@ -5,7 +5,7 @@ import { Star } from "lucide-react";
 export default function TestimonialsSection() {
   return (
     <section className="w-full py-16 bg-white">
-      <div className="max-w-[70%] mx-auto">
+      <div className="max-w-[90%] lg:max-w-[90%] xl:max-w-[80%] 2xl:max-w-[75%] mx-auto">
         {/* Heading */}
         <div className="text-center mb-12">
           <div className="inline-flex items-center gap-2 bg-green-100 text-green-700 px-4 py-1.5 rounded-md text-sm font-semibold mb-4">

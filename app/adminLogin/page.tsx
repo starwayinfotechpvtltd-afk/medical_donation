@@ -10,8 +10,8 @@ import { getDashboardPathForRole } from '@/lib/auth-routes';
 export default function AdminLogin() {
   const router = useRouter();
   const { login } = useAuth();
-  const [email, setEmail] = useState('admin@hospital.com');
-  const [password, setPassword] = useState('admin123');
+const [email, setEmail] = useState('');
+const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
@@ -105,15 +105,6 @@ export default function AdminLogin() {
               {loading ? 'Logging in...' : 'Login to Dashboard'}
             </button>
           </form>
-
-          {/* Demo Credentials */}
-          <div className="mt-6 p-4 bg-gray-50 border border-gray-200 rounded-xl">
-            <p className="text-sm font-medium text-gray-700 mb-2">📋 Demo Credentials:</p>
-            <div className="space-y-1">
-              <p className="text-xs text-gray-600 font-mono">Email: admin@hospital.com</p>
-              <p className="text-xs text-gray-600 font-mono">Password: admin123</p>
-            </div>
-          </div>
 
           {/* Footer Links */}
           <div className="mt-6 pt-6 border-t border-gray-200">

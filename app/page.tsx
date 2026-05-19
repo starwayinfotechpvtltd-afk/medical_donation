@@ -15,6 +15,7 @@ import TestimonialsSection from "@/components/Home/TestimonialsSection";
 import DepartmentCard from "@/components/Home/DepartmentCard";
 import DoctorsSection from "@/components/Home/DoctorHome";
 import DonationSection from "@/components/Home/DonationSection";
+import FAQSection from "@/components/Home/FaqSection";
 
 export default function Home() {
   const featuredDoctors = doctors.slice(0, 3);
@@ -29,7 +30,7 @@ export default function Home() {
         <HomeServicesSection />
         {/* Departments Section */}
         <section className="w-full">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20">
+          <div className="max-w-[90%] lg:max-w-[90%] xl:max-w-[80%] 2xl:max-w-[75%] mx-auto lg:px-8 py-20">
             <div className="text-center">
               <SectionHeading
                 title="Our Departments"
@@ -51,22 +52,36 @@ export default function Home() {
         <DonationSection />
         {/* CTA Section */}
         <section className="bg-emerald-500 text-white py-16">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-            <h2 className="text-4xl font-bold mb-4">
-              Ready to Book Your Appointment?
-            </h2>
-            <p className="text-xl mb-8 text-emerald-50 max-w-2xl mx-auto">
-              Our healthcare professionals are ready to help you. Schedule your
-              appointment today.
-            </p>
-            <Link
-              href="/appointment"
-              className="inline-block bg-white text-emerald-500 px-8 py-3 rounded-lg font-semibold hover:bg-emerald-50 transition-colors"
-            >
-              Book Now
-            </Link>
+          <div className="max-w-[90%] lg:max-w-[90%] xl:max-w-[80%] 2xl:max-w-[75%] mx-auto px-4 sm:px-6 lg:px-8">
+            <div className="flex flex-col lg:flex-row items-center justify-between gap-8">
+
+              {/* Left Content */}
+              <div className="text-center lg:text-left">
+                <h2 className="text-4xl font-bold mb-4">
+                  Ready to Book Your Appointment?
+                </h2>
+
+                <p className="text-xl text-emerald-50 max-w-2xl">
+                  Our healthcare professionals are ready to help you. Schedule your
+                  appointment today.
+                </p>
+              </div>
+
+              {/* Right Button */}
+              <div className="flex-shrink-0">
+                <Link
+                  href="/appointment"
+                  className="inline-flex items-center justify-center bg-white text-emerald-500 px-8 py-4 rounded-xl font-semibold hover:bg-emerald-50 transition-all duration-300 shadow-lg"
+                >
+                  Book Now
+                </Link>
+              </div>
+
+            </div>
           </div>
         </section>
+
+        <FAQSection />
       </main>
       <Footer />
     </>

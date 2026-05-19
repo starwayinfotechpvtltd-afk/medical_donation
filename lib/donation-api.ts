@@ -1,40 +1,37 @@
 import { api } from './api-client';
 
-export interface DonationCampaign {
-  id: number;
-  title: string;
-  description?: string | null;
-  status: 'draft' | 'active' | 'paused' | 'completed' | 'cancelled';
-  goal_amount: number | string;
-  raised_amount: number | string;
-  currency: string;
-  thumbnail_url?: string | null;
-  patient_name?: string | null;
-}
-
 export interface DonationPayload {
   amount: number;
-  currency: string;
+  currency?: string;
   payment_method?: 'credit_card' | 'debit_card' | 'upi' | 'net_banking' | 'cash' | 'bank_transfer' | 'other';
-  donor_name: string;
-  donor_email: string;
-  donor_phone: string;
+  donor_name?: string | null;
+  donor_email?: string | null;
+  donor_phone?: string | null;
   donor_pan?: string | null;
   donor_address?: string | null;
-  is_anonymous: boolean;
+  is_anonymous?: boolean;
   donor_message?: string | null;
 }
 
 export interface DonationTransaction {
   id: number;
-  donation_id: number;
   amount: number | string;
   currency: string;
   payment_method: string;
-  payment_status: string;
+  payment_status: 'pending' | 'completed' | 'failed' | 'refunded';
   transaction_ref: string;
+  razorpay_order_id?: string | null;
+  razorpay_payment_id?: string | null;
+  donor_name?: string | null;
+  donor_email?: string | null;
+  donor_phone?: string | null;
+  donor_pan?: string | null;
+  donor_address?: string | null;
+  is_anonymous: number;
   donor_message?: string | null;
+  receipt_url?: string | null;
   created_at: string;
+  updated_at: string;
 }
 
 export interface DonationInitResponse {
@@ -48,8 +45,6 @@ export interface DonationInitResponse {
 }
 
 export interface DonationStats {
-  total_campaigns: number;
-  active_campaigns: number;
   total_raised: number | string;
   total_transactions: number;
   today_transactions: number;
@@ -68,7 +63,7 @@ export interface RecentDonation {
   donor_email?: string | null;
   donor_phone?: string | null;
   transaction_ref?: string | null;
-  purpose: string;
+  donor_message?: string | null;
 }
 
 export const donationApi = {
@@ -76,7 +71,11 @@ export const donationApi = {
     return api.post<DonationInitResponse>('/donations/donate', payload);
   },
 
-  verifyPayment(payload: { razorpay_order_id: string; razorpay_payment_id: string; razorpay_signature: string }) {
+  verifyPayment(payload: {
+    razorpay_order_id: string;
+    razorpay_payment_id: string;
+    razorpay_signature: string;
+  }) {
     return api.post<DonationTransaction>('/donations/verify-payment', payload);
   },
 

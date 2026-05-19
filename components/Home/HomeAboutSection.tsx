@@ -6,8 +6,8 @@ import Link from "next/link";
 export default function HomeAboutSection() {
   return (
     <section className="w-full py-16 bg-white">
-      <div className="max-w-[70%] mx-auto grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
-        
+      <div className="max-w-[90%] lg:max-w-[90%] xl:max-w-[80%] 2xl:max-w-[75%] mx-auto grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
+
         {/* LEFT SIDE */}
         <div>
           {/* Small Badge */}
@@ -33,7 +33,7 @@ export default function HomeAboutSection() {
 
         {/* RIGHT SIDE */}
         <div className="flex flex-col gap-6">
-          
+
           {/* Top Image */}
           <div className="rounded-2xl overflow-hidden shadow-md border border-gray-200 relative w-full h-[180px] md:h-[200px]">
             <Image
@@ -46,7 +46,7 @@ export default function HomeAboutSection() {
 
           {/* Content Row */}
           <div className="flex flex-col md:flex-row gap-6 items-start">
-            
+
             {/* Features List */}
             <div className="flex-1">
               <ul className="space-y-3 text-gray-700 text-sm font-medium">
@@ -72,11 +72,11 @@ export default function HomeAboutSection() {
               </ul>
 
               {/* Button */}
-<Link href="/about">
-  <button className="mt-6 bg-green-600 hover:bg-green-700 text-white px-6 py-3 rounded-xl font-semibold text-sm shadow-md transition cursor-pointer">
-    More About Us
-  </button>
-</Link>
+              <Link href="/about">
+                <button className="mt-6 bg-green-600 hover:bg-green-700 text-white px-6 py-3 rounded-xl font-semibold text-sm shadow-md transition cursor-pointer">
+                  More About Us
+                </button>
+              </Link>
             </div>
 
             {/* Experience Card */}
