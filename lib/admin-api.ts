@@ -65,6 +65,7 @@ export interface Department {
   description?: string | null;
   icon?: string | null;
   image_url?: string | null;
+  doctors?: number;
   beds?: number | null;
   is_active?: number;
   services?: DepartmentService[];
@@ -196,7 +197,7 @@ export const adminApi = {
   async getDepartments() { const response = await api.get<Department[]>('/departments'); return (response.data ?? []) as Department[]; },
   async getDepartment(id: number) { const response = await api.get<{ department: Department; services: DepartmentService[]; doctors: DoctorProfile[] }>(`/departments/${id}`); return response.data as { department: Department; services: DepartmentService[]; doctors: DoctorProfile[] }; },
   async createDepartment(payload: FormData | { name: string; description?: string; icon?: string; image_url?: string; beds?: number }) { const response = await api.post<{ id: number }>('/departments', payload); return response.data as { id: number }; },
-  async updateDepartment(id: number, payload: Partial<{ name: string; description: string; icon: string; image_url: string; beds: number }>) { await api.patch(`/departments/${id}`, payload); },
+  async updateDepartment(id: number, payload: FormData | Partial<{ name: string; description: string; icon: string; image_url: string; beds: number; services: string }>) { await api.patch(`/departments/${id}`, payload); },
   async deleteDepartment(id: number) { await api.delete(`/departments/${id}`); },
 
   async getDoctors() { const response = await api.get<DoctorProfile[]>('/doctors'); return (response.data ?? []) as DoctorProfile[]; },

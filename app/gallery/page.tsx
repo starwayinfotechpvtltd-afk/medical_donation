@@ -128,22 +128,6 @@ export default function Gallery() {
                 </p>
               </div>
 
-              {/* Right — stat pills */}
-              <div className="flex flex-wrap gap-3 lg:flex-col lg:items-end shrink-0">
-                {[
-                  { n: "9+", l: "Photo Galleries" },
-                  { n: "3", l: "Categories" },
-                  { n: "10+", l: "Departments" },
-                ].map(({ n, l }) => (
-                  <div
-                    key={l}
-                    className="flex items-center gap-3 rounded-2xl bg-white/15 backdrop-blur-sm border border-white/20 px-5 py-3"
-                  >
-                    <span className="text-2xl font-bold text-white">{n}</span>
-                    <span className="text-sm text-emerald-100">{l}</span>
-                  </div>
-                ))}
-              </div>
             </div>
           </div>
         </section>

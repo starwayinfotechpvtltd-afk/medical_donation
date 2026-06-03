@@ -36,7 +36,6 @@ export default function UploadResultsPage() {
           <h1 className="text-4xl font-bold text-slate-900 mb-2">Upload Test Results</h1>
           <p className="text-slate-600">Submit completed laboratory test results</p>
         </div>
-
         <div>
           <h1 className="text-4xl font-medium">Upload Testing formet</h1>
           <p className='text-accent font'></p>

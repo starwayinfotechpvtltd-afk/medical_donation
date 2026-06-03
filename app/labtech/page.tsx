@@ -1,281 +1,101 @@
-// app/technician/page.tsx
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import {
-  Beaker, Upload, CheckCircle2, Clock, Download, Plus,
-  Activity, Heart, Brain, Bone, Microscope, TestTube,
-  Calendar, Users, FileText, TrendingUp, AlertCircle,
-  ChevronRight, Eye, Filter, Search, X, Printer,
-  DownloadCloud, Settings, User, Bell
+  Upload, CheckCircle2, Clock, Download,
+  Activity, Calendar, FileText, TrendingUp, AlertCircle,
+  Eye, X, DownloadCloud, LayoutDashboard, Beaker, Heart
 } from 'lucide-react';
+import { api, ApiException } from '@/lib/api-client';
 
-// Mock Data for Different Technician Types
-const technicianData = {
-  laboratory: {
-    name: 'Clinical Laboratory',
-    icon: <Beaker className="w-5 h-5" />,
-    stats: {
-      pendingTests: 12,
-      completedToday: 8,
-      totalResults: 45,
-      avgTurnaround: '24 hrs'
-    },
-    tests: [
-      { id: 'LAB001', testName: 'Complete Blood Count', patientId: 'P001', patientName: 'John Sharma', priority: 'routine', status: 'pending', orderDate: '2024-03-30' },
-      { id: 'LAB002', testName: 'Lipid Profile', patientId: 'P002', patientName: 'Priya Patel', priority: 'urgent', status: 'in-progress', orderDate: '2024-03-30' },
-      { id: 'LAB003', testName: 'Thyroid Function', patientId: 'P003', patientName: 'Aisha Khan', priority: 'stat', status: 'pending', orderDate: '2024-03-29' },
-      { id: 'LAB004', testName: 'Blood Glucose', patientId: 'P004', patientName: 'Ravi Patel', priority: 'routine', status: 'pending', orderDate: '2024-03-29' }
-    ]
-  },
-  radiology: {
-    name: 'Radiology & Imaging',
-    icon: <Activity className="w-5 h-5" />,
-    stats: {
-      pendingTests: 8,
-      completedToday: 12,
-      totalResults: 32,
-      avgTurnaround: '2 hrs'
-    },
-    tests: [
-      { id: 'RAD001', testName: 'Chest X-Ray', patientId: 'P005', patientName: 'Sara Ahmed', priority: 'urgent', status: 'pending', orderDate: '2024-03-30' },
-      { id: 'RAD002', testName: 'MRI Brain', patientId: 'P006', patientName: 'Arun Mehta', priority: 'routine', status: 'in-progress', orderDate: '2024-03-29' },
-      { id: 'RAD003', testName: 'CT Abdomen', patientId: 'P007', patientName: 'Neha Gupta', priority: 'stat', status: 'pending', orderDate: '2024-03-30' }
-    ]
-  },
-  cardiology: {
-    name: 'Cardiology Diagnostics',
-    icon: <Heart className="w-5 h-5" />,
-    stats: {
-      pendingTests: 5,
-      completedToday: 6,
-      totalResults: 28,
-      avgTurnaround: '1.5 hrs'
-    },
-    tests: [
-      { id: 'CARD001', testName: 'ECG', patientId: 'P008', patientName: 'Vikram Singh', priority: 'urgent', status: 'pending', orderDate: '2024-03-30' },
-      { id: 'CARD002', testName: 'Echocardiogram', patientId: 'P009', patientName: 'Meera Desai', priority: 'routine', status: 'in-progress', orderDate: '2024-03-29' }
-    ]
-  },
-  dialysis: {
-    name: 'Dialysis Unit',
-    icon: <Activity className="w-5 h-5" />,
-    stats: {
-      pendingTests: 3,
-      completedToday: 8,
-      totalResults: 52,
-      avgTurnaround: '4 hrs'
-    },
-    tests: [
-      { id: 'DIA001', testName: 'Dialysis Session', patientId: 'P010', patientName: 'Rajesh Gupta', priority: 'routine', status: 'in-progress', orderDate: '2024-03-30' }
-    ]
-  }
-};
+interface LabTestRow {
+  id: number;
+  patient_id: number;
+  patient_reg_no: string;
+  patient_first_name: string;
+  patient_last_name: string;
+  patient_phone?: string | null;
+  doctor_first_name?: string | null;
+  doctor_last_name?: string | null;
+  test_name: string;
+  category: string;
+  priority: string;
+  status: string;
+  request_date: string;
+  updated_at?: string;
+  result_file_url?: string | null;
+}
 
 function StatusBadge({ status }: { status: string }) {
-  const config = {
-    pending: { icon: Clock, color: 'bg-amber-100 text-amber-700', label: 'Pending' },
-    'in-progress': { icon: Activity, color: 'bg-blue-100 text-blue-700', label: 'In Progress' },
-    completed: { icon: CheckCircle2, color: 'bg-emerald-100 text-emerald-700', label: 'Completed' },
-    urgent: { icon: AlertCircle, color: 'bg-red-100 text-red-700', label: 'Urgent' },
-    routine: { icon: Clock, color: 'bg-slate-100 text-slate-700', label: 'Routine' },
-    stat: { icon: AlertCircle, color: 'bg-red-100 text-red-700', label: 'STAT' }
+  const cfg: Record<string, { cls: string; label: string }> = {
+    pending: { cls: 'bg-amber-100 text-amber-700', label: 'Pending' },
+    in_progress: { cls: 'bg-blue-100 text-blue-700', label: 'In Progress' },
+    completed: { cls: 'bg-emerald-100 text-emerald-700', label: 'Completed' },
+    rejected: { cls: 'bg-red-100 text-red-700', label: 'Rejected' },
   };
-  const { icon: Icon, color, label } = config[status as keyof typeof config] || config.pending;
-  return (
-    <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium ${color}`}>
-      <Icon className="w-3 h-3" />
-      {label}
-    </span>
-  );
+  const c = cfg[status] || cfg.pending;
+  return <span className={`inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-xs font-medium ${c.cls}`}>{c.label}</span>;
 }
 
 function PriorityBadge({ priority }: { priority: string }) {
-  const config = {
+  const cfg: Record<string, string> = {
     routine: 'bg-slate-100 text-slate-700',
     urgent: 'bg-amber-100 text-amber-700',
-    stat: 'bg-red-100 text-red-700'
+    stat: 'bg-red-100 text-red-700',
   };
-  return (
-    <span className={`inline-flex items-center px-2 py-0.5 rounded-md text-xs font-medium ${config[priority as keyof typeof config]}`}>
-      {priority.toUpperCase()}
-    </span>
-  );
+  return <span className={`inline-flex items-center rounded-md px-2 py-0.5 text-xs font-medium ${cfg[priority] || 'bg-slate-100 text-slate-700'}`}>{priority.toUpperCase()}</span>;
 }
 
-function StatsCard({ title, value, icon, color, trend }: any) {
-  const colorClasses = {
-    blue: 'bg-blue-50 text-blue-600',
-    sky: 'bg-sky-50 text-sky-600',
-    cyan: 'bg-cyan-50 text-cyan-600',
-    purple: 'bg-purple-50 text-purple-600',
-    emerald: 'bg-emerald-50 text-emerald-600',
-    amber: 'bg-amber-50 text-amber-600'
-  };
-  
-  return (
-    <div className="bg-white rounded-xl border border-slate-100 p-5 hover:shadow-md transition-all">
-      <div className="flex items-start justify-between mb-3">
-        <div className={`p-2.5 rounded-lg ${colorClasses[color as keyof typeof colorClasses]}`}>
-          {icon}
-        </div>
-        {trend && (
-          <span className={`text-xs font-semibold px-2 py-1 rounded-full flex items-center gap-1 ${
-            trend.direction === 'up' ? 'bg-emerald-50 text-emerald-700' : 'bg-red-50 text-red-600'
-          }`}>
-            <TrendingUp className="w-3 h-3" />
-            {trend.percentage}%
-          </span>
-        )}
-      </div>
-      <p className="text-2xl font-bold text-slate-900 mb-1">{value}</p>
-      <p className="text-sm text-slate-500">{title}</p>
-    </div>
-  );
-}
+function UploadModal({ isOpen, onClose, test, onSubmit }: { isOpen: boolean; onClose: () => void; test: LabTestRow | null; onSubmit: (payload: { result_file_url?: string; notes?: string }) => Promise<void>; }) {
+  const [resultFileUrl, setResultFileUrl] = useState('');
+  const [notes, setNotes] = useState('');
+  const [saving, setSaving] = useState(false);
 
-function TestCard({ test, onStart, onUpload }: any) {
-  return (
-    <div className="bg-white rounded-xl border border-slate-100 p-4 hover:shadow-md transition-all">
-      <div className="flex items-start justify-between mb-3">
-        <div>
-          <div className="flex items-center gap-2 mb-1">
-            <h3 className="font-semibold text-slate-900">{test.testName}</h3>
-            <PriorityBadge priority={test.priority} />
-          </div>
-          <div className="flex items-center gap-2 text-sm text-slate-600">
-            <span>Patient: {test.patientName}</span>
-            <span className="text-slate-300">•</span>
-            <span className="text-xs text-slate-500">ID: {test.patientId}</span>
-          </div>
-        </div>
-        <StatusBadge status={test.status} />
-      </div>
-      
-      <div className="flex items-center gap-2 text-xs text-slate-500 mb-3">
-        <Calendar className="w-3.5 h-3.5" />
-        <span>Ordered: {new Date(test.orderDate).toLocaleDateString()}</span>
-      </div>
-      
-      <div className="flex gap-2">
-        <button
-          onClick={() => onStart(test)}
-          className="flex-1 flex items-center justify-center gap-1.5 px-3 py-2 bg-blue-50 hover:bg-blue-100 rounded-lg text-sm font-medium text-blue-600 transition-colors"
-        >
-          <Eye className="w-3.5 h-3.5" />
-          Start Test
-        </button>
-        <button
-          onClick={() => onUpload(test)}
-          className="flex-1 flex items-center justify-center gap-1.5 px-3 py-2 bg-emerald-50 hover:bg-emerald-100 rounded-lg text-sm font-medium text-emerald-600 transition-colors"
-        >
-          <Upload className="w-3.5 h-3.5" />
-          Upload Results
-        </button>
-      </div>
-    </div>
-  );
-}
+  useEffect(() => {
+    setResultFileUrl(test?.result_file_url || '');
+    setNotes('');
+  }, [test, isOpen]);
 
-function UploadModal({ isOpen, onClose, onUpload }: any) {
-  const [formData, setFormData] = useState({
-    patientId: '',
-    testName: '',
-    parameters: '',
-    notes: ''
-  });
-  
-  if (!isOpen) return null;
-  
-  const handleSubmit = (e: React.FormEvent) => {
+  if (!isOpen || !test) return null;
+
+  const submit = async (e: React.FormEvent) => {
     e.preventDefault();
-    onUpload(formData);
-    onClose();
+    setSaving(true);
+    try {
+      await onSubmit({ result_file_url: resultFileUrl || undefined, notes: notes || undefined });
+      onClose();
+    } finally {
+      setSaving(false);
+    }
   };
-  
+
   return (
-    <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4" onClick={onClose}>
-      <div className="bg-white rounded-2xl shadow-xl max-w-2xl w-full max-h-[90vh] overflow-y-auto" onClick={(e) => e.stopPropagation()}>
-        <div className="sticky top-0 bg-white border-b border-slate-100 px-6 py-4 flex items-center justify-between">
-          <h2 className="text-xl font-bold text-slate-900">Upload Test Results</h2>
-          <button onClick={onClose} className="p-1 hover:bg-slate-100 rounded-lg">
-            <X className="w-5 h-5 text-slate-400" />
-          </button>
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4" onClick={onClose}>
+      <div className="max-h-[90vh] w-full max-w-xl overflow-y-auto rounded-2xl bg-white shadow-xl" onClick={(e) => e.stopPropagation()}>
+        <div className="sticky top-0 flex items-center justify-between border-b border-slate-100 bg-white px-6 py-4">
+          <h2 className="text-xl font-bold text-slate-900">Upload Result</h2>
+          <button onClick={onClose} className="rounded-lg p-1 hover:bg-slate-100"><X className="h-5 w-5 text-slate-400" /></button>
         </div>
-        
-        <form onSubmit={handleSubmit} className="p-6 space-y-4">
+        <form onSubmit={submit} className="space-y-4 p-6">
+          <div className="rounded-lg bg-slate-50 p-3 text-sm text-slate-700">
+            <p className="font-semibold text-slate-900">{test.test_name}</p>
+            <p>{test.patient_first_name} {test.patient_last_name} | Reg: {test.patient_reg_no}</p>
+          </div>
           <div>
-            <label className="block text-sm font-medium text-slate-700 mb-1">
-              Patient ID *
-            </label>
-            <input
-              type="text"
-              value={formData.patientId}
-              onChange={(e) => setFormData({ ...formData, patientId: e.target.value })}
-              className="w-full px-3 py-2 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500/20"
-              required
-            />
+            <label className="mb-1 block text-sm font-medium text-slate-700">Report URL (optional)</label>
+            <input value={resultFileUrl} onChange={(e) => setResultFileUrl(e.target.value)} className="w-full rounded-lg border border-slate-200 px-3 py-2 text-sm" placeholder="https://... or /uploads/lab/..." />
           </div>
-          
           <div>
-            <label className="block text-sm font-medium text-slate-700 mb-1">
-              Test Name *
-            </label>
-            <input
-              type="text"
-              value={formData.testName}
-              onChange={(e) => setFormData({ ...formData, testName: e.target.value })}
-              className="w-full px-3 py-2 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500/20"
-              required
-            />
+            <label className="mb-1 block text-sm font-medium text-slate-700">Technician Notes</label>
+            <textarea value={notes} onChange={(e) => setNotes(e.target.value)} rows={3} className="w-full rounded-lg border border-slate-200 px-3 py-2 text-sm" />
           </div>
-          
-          <div>
-            <label className="block text-sm font-medium text-slate-700 mb-1">
-              Test Parameters & Values
-            </label>
-            <textarea
-              value={formData.parameters}
-              onChange={(e) => setFormData({ ...formData, parameters: e.target.value })}
-              rows={4}
-              className="w-full px-3 py-2 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500/20"
-              placeholder="e.g., Hemoglobin: 14.2 g/dL&#10;WBC Count: 7.5 x10³/µL"
-            />
+          <div className="rounded-lg border-2 border-dashed border-slate-200 p-6 text-center">
+            <DownloadCloud className="mx-auto mb-2 h-8 w-8 text-slate-400" />
+            <p className="text-sm text-slate-600">Use report URL above (file upload endpoint can be integrated next)</p>
           </div>
-          
-          <div>
-            <label className="block text-sm font-medium text-slate-700 mb-1">
-              Technician Notes
-            </label>
-            <textarea
-              value={formData.notes}
-              onChange={(e) => setFormData({ ...formData, notes: e.target.value })}
-              rows={2}
-              className="w-full px-3 py-2 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500/20"
-              placeholder="Any observations or notes..."
-            />
-          </div>
-          
-          <div className="border-2 border-dashed border-slate-200 rounded-lg p-6 text-center hover:border-blue-300 transition-colors">
-            <DownloadCloud className="w-8 h-8 text-slate-400 mx-auto mb-2" />
-            <p className="text-sm text-slate-600">Drag and drop your test results file</p>
-            <p className="text-xs text-slate-400 mt-1">PDF, Images, or Excel files supported</p>
-          </div>
-          
-          <div className="flex gap-3 pt-4">
-            <button
-              type="submit"
-              className="flex-1 bg-blue-600 text-white py-2 rounded-lg font-medium hover:bg-blue-700 transition-colors"
-            >
-              Upload Results
-            </button>
-            <button
-              type="button"
-              onClick={onClose}
-              className="flex-1 bg-slate-100 text-slate-700 py-2 rounded-lg font-medium hover:bg-slate-200 transition-colors"
-            >
-              Cancel
-            </button>
+          <div className="flex gap-3 pt-2">
+            <button disabled={saving} type="submit" className="flex-1 rounded-lg bg-blue-600 py-2 font-medium text-white hover:bg-blue-700 disabled:opacity-50">{saving ? 'Saving...' : 'Mark Completed'}</button>
+            <button type="button" onClick={onClose} className="flex-1 rounded-lg bg-slate-100 py-2 font-medium text-slate-700 hover:bg-slate-200">Cancel</button>
           </div>
         </form>
       </div>
@@ -283,235 +103,125 @@ function UploadModal({ isOpen, onClose, onUpload }: any) {
   );
 }
 
+const matchDept = (row: LabTestRow, dept: string) => {
+  if (dept === 'all') return true;
+  const name = row.test_name.toLowerCase();
+  const category = (row.category || '').toLowerCase();
+  if (dept === 'laboratory') return ['hematology', 'biochemistry', 'microbiology', 'immunology', 'pathology', 'other'].includes(category);
+  if (dept === 'radiology') return category === 'radiology' || name.includes('x-ray') || name.includes('mri') || name.includes('ct');
+  if (dept === 'cardiology') return category === 'cardiology' || name.includes('ecg') || name.includes('echo') || name.includes('cardio');
+  if (dept === 'dialysis') return name.includes('dialysis');
+  return category === dept || name.includes(dept);
+};
+
 export default function TechnicianDashboard({ activeDept = 'laboratory' }: { activeDept?: string }) {
+  const [rows, setRows] = useState<LabTestRow[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState('');
   const [showUploadModal, setShowUploadModal] = useState(false);
-  const [selectedTest, setSelectedTest] = useState(null);
-  
-  const currentData = technicianData[activeDept as keyof typeof technicianData];
-  const stats = currentData.stats;
-  const tests = currentData.tests;
-  
-  const handleStartTest = (test: any) => {
-    console.log('Starting test:', test);
-    alert(`Starting ${test.testName} for patient ${test.patientName}`);
+  const [selectedTest, setSelectedTest] = useState<LabTestRow | null>(null);
+
+  const load = async () => {
+    setLoading(true);
+    setError('');
+    try {
+      const res = await api.get<LabTestRow[]>('/lab/lab-tests');
+      setRows((res.data ?? []) as LabTestRow[]);
+    } catch (err) {
+      setError(err instanceof ApiException ? err.message : 'Failed to load dashboard data.');
+    } finally {
+      setLoading(false);
+    }
   };
-  
-  const handleUploadResults = (test: any) => {
+
+  useEffect(() => { void load(); }, []);
+
+  const filtered = useMemo(() => rows.filter((r) => matchDept(r, activeDept)), [rows, activeDept]);
+
+  const stats = useMemo(() => {
+    const pending = filtered.filter((r) => r.status === 'pending' || r.status === 'in_progress').length;
+    const completedToday = filtered.filter((r) => r.status === 'completed' && new Date(r.updated_at || r.request_date).toDateString() === new Date().toDateString()).length;
+    const completed = filtered.filter((r) => r.status === 'completed');
+    let avgHours = 0;
+    if (completed.length) {
+      const totalMs = completed.reduce((sum, r) => sum + Math.max(0, new Date(r.updated_at || r.request_date).getTime() - new Date(r.request_date).getTime()), 0);
+      avgHours = totalMs / completed.length / (1000 * 60 * 60);
+    }
+    return {
+      pending,
+      completedToday,
+      totalResults: completed.length,
+      avgTurnaround: completed.length ? `${avgHours.toFixed(1)} hrs` : '0 hrs',
+    };
+  }, [filtered]);
+
+  const openUpload = (test: LabTestRow) => {
     setSelectedTest(test);
     setShowUploadModal(true);
   };
-  
-  const handleUpload = (data: any) => {
-    console.log('Uploading results:', data);
-    alert('Results uploaded successfully!');
+
+  const submitResult = async ({ result_file_url }: { result_file_url?: string; notes?: string }) => {
+    if (!selectedTest) return;
+    await api.patch(`/lab/lab-tests/${selectedTest.id}/results`, { result_file_url: result_file_url || null, results: [] });
+    await load();
   };
 
-  //============
+  const deptIcon = activeDept === 'all' ? <LayoutDashboard className="h-6 w-6 text-blue-600" /> : activeDept === 'cardiology' ? <Heart className="h-6 w-6 text-red-600" /> : <Beaker className="h-6 w-6 text-blue-600" />;
+  const deptTitle = activeDept === 'all' ? 'All Departments' : activeDept.charAt(0).toUpperCase() + activeDept.slice(1);
 
-  const handleUpdate = (data: any) => {
-    console.log(`Uploading results:`, data);
-  alert('Results updatilg successfully!');
-  }
-
-  
-
-  
-  const getDepartmentIcon = () => {
-    switch(activeDept) {
-      case 'laboratory': return <Beaker className="w-6 h-6 text-blue-600" />;
-      case 'radiology': return <Activity className="w-6 h-6 text-sky-600" />;
-      case 'cardiology': return <Heart className="w-6 h-6 text-red-600" />;
-      case 'dialysis': return <Activity className="w-6 h-6 text-cyan-600" />;
-      default: return <Beaker className="w-6 h-6 text-blue-600" />;
-    }
-  };
-  
-  const getDepartmentTitle = () => {
-    switch(activeDept) {
-      case 'laboratory': return 'Clinical Laboratory';
-      case 'radiology': return 'Radiology & Imaging';
-      case 'cardiology': return 'Cardiology Diagnostics';
-      case 'dialysis': return 'Dialysis Unit';
-      default: return 'Medical Diagnostics';
-    }
-  };
-  
   return (
-    <div className="p-4 sm:p-6 space-y-6 max-w-7xl mx-auto">
-      {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+    <div className="mx-auto max-w-7xl space-y-6 p-4 sm:p-6">
+      <div className="flex flex-col justify-between gap-4 sm:flex-row sm:items-center">
         <div>
-          <div className="flex items-center gap-2 mb-1">
-            {getDepartmentIcon()}
-            <h1 className="text-2xl font-bold text-slate-900">{getDepartmentTitle()}</h1>
-          </div>
-          <p className="text-sm text-slate-500 mt-1">Manage tests, upload results, and track progress</p>
+          <div className="mb-1 flex items-center gap-2">{deptIcon}<h1 className="text-2xl font-bold text-slate-900">{deptTitle}</h1></div>
+          <p className="text-sm text-slate-500">Live technician dashboard from current lab data flow.</p>
         </div>
         <div className="flex items-center gap-2">
-          <button className="flex items-center gap-2 px-3 py-2 text-sm text-slate-600 hover:bg-white rounded-lg transition-colors border border-slate-200">
-            <Printer className="w-4 h-4" />
-            Print
-          </button>
-          <button className="flex items-center gap-2 px-3 py-2 text-sm text-slate-600 hover:bg-white rounded-lg transition-colors border border-slate-200">
-            <Download className="w-4 h-4" />
-            Export
-          </button>
+          <button onClick={() => void load()} className="rounded-lg border border-slate-200 px-3 py-2 text-sm text-slate-600 hover:bg-white">Refresh</button>
+          <button className="rounded-lg border border-slate-200 px-3 py-2 text-sm text-slate-600 hover:bg-white"><Download className="mr-1 inline h-4 w-4" />Export</button>
         </div>
       </div>
-      
-      {/* Stats Grid */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-        <StatsCard
-          title="Pending Tests"
-          value={stats.pendingTests}
-          icon={<Clock className="w-5 h-5" />}
-          color="blue"
-          trend={{ direction: 'down', percentage: 5 }}
-        />
-        <StatsCard
-          title="Completed Today"
-          value={stats.completedToday}
-          icon={<CheckCircle2 className="w-5 h-5" />}
-          color="emerald"
-          trend={{ direction: 'up', percentage: 15 }}
-        />
-        <StatsCard
-          title="Total Results"
-          value={stats.totalResults}
-          icon={<FileText className="w-5 h-5" />}
-          color="purple"
-        />
-        <StatsCard
-          title="Avg Turnaround"
-          value={stats.avgTurnaround}
-          icon={<Clock className="w-5 h-5" />}
-          color="cyan"
-        />
+
+      {error && <div className="rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">{error}</div>}
+
+      <div className="grid grid-cols-2 gap-4 lg:grid-cols-4">
+        <div className="rounded-xl border border-slate-100 bg-white p-5"><p className="text-2xl font-bold text-slate-900">{stats.pending}</p><p className="text-sm text-slate-500">Pending Tests</p></div>
+        <div className="rounded-xl border border-slate-100 bg-white p-5"><p className="text-2xl font-bold text-slate-900">{stats.completedToday}</p><p className="text-sm text-slate-500">Completed Today</p></div>
+        <div className="rounded-xl border border-slate-100 bg-white p-5"><p className="text-2xl font-bold text-slate-900">{stats.totalResults}</p><p className="text-sm text-slate-500">Total Results</p></div>
+        <div className="rounded-xl border border-slate-100 bg-white p-5"><p className="text-2xl font-bold text-slate-900">{stats.avgTurnaround}</p><p className="text-sm text-slate-500">Avg Turnaround</p></div>
       </div>
-      
-      {/* Two Column Layout */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        {/* Pending Tests List */}
-        <div className="lg:col-span-2">
-          <div className="bg-white rounded-xl border border-slate-100">
-            <div className="flex items-center justify-between p-5 border-b border-slate-100">
-              <div>
-                <h3 className="text-lg font-semibold text-slate-900">Pending Tests</h3>
-                <p className="text-sm text-slate-500 mt-1">Tests awaiting your attention</p>
-              </div>
-              <button className="text-sm text-blue-600 hover:text-blue-700 font-medium flex items-center gap-1">
-                View All <ChevronRight className="w-4 h-4" />
-              </button>
-            </div>
-            <div className="p-5 space-y-3">
-              {tests.map((test) => (
-                <TestCard
-                  key={test.id}
-                  test={test}
-                  onStart={handleStartTest}
-                  onUpload={handleUploadResults}
-                />
-              ))}
-            </div>
+
+      <div className="rounded-xl border border-slate-100 bg-white">
+        <div className="flex items-center justify-between border-b border-slate-100 p-5">
+          <div>
+            <h3 className="text-lg font-semibold text-slate-900">Assigned Tests</h3>
+            <p className="mt-1 text-sm text-slate-500">Department-filtered live records</p>
           </div>
         </div>
-        
-        {/* Quick Actions & Stats */}
-        <div className="space-y-6">
-          {/* Quick Actions */}
-          <div className="bg-white rounded-xl border border-slate-100 p-5">
-            <h3 className="text-lg font-semibold text-slate-900 mb-4">Quick Actions</h3>
-            <div className="space-y-3">
-              <button
-                onClick={() => setShowUploadModal(true)}
-                className="w-full flex items-center justify-center gap-2 px-4 py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-medium transition-colors"
-              >
-                <Upload className="w-4 h-4" />
-                Upload Results
-              </button>
-              <button className="w-full flex items-center justify-center gap-2 px-4 py-3 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-lg font-medium transition-colors">
-                <Plus className="w-4 h-4" />
-                Request New Test
-              </button>
-              <button className="w-full flex items-center justify-center gap-2 px-4 py-3 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-lg font-medium transition-colors">
-                <FileText className="w-4 h-4" />
-                View Templates
-              </button>
-            </div>
-          </div>
-          
-          {/* Equipment Status */}
-          <div className="bg-white rounded-xl border border-slate-100 p-5">
-            <h3 className="text-lg font-semibold text-slate-900 mb-4">Equipment Status</h3>
-            <div className="space-y-3">
-              {[
-                { name: 'Hematology Analyzer', status: 'operational', usage: '85%' },
-                { name: 'Chemistry Analyzer', status: 'maintenance', usage: '0%' },
-                { name: 'Microscope', status: 'operational', usage: '45%' },
-                { name: 'Centrifuge', status: 'operational', usage: '30%' }
-              ].map((eq, idx) => (
-                <div key={idx} className="flex items-center justify-between p-2 hover:bg-slate-50 rounded-lg">
-                  <div>
-                    <p className="text-sm font-medium text-slate-700">{eq.name}</p>
-                    <p className="text-xs text-slate-500">Usage: {eq.usage}</p>
-                  </div>
-                  <span className={`px-2 py-0.5 rounded-full text-xs font-medium ${
-                    eq.status === 'operational' ? 'bg-emerald-100 text-emerald-700' : 'bg-amber-100 text-amber-700'
-                  }`}>
-                    {eq.status}
-                  </span>
+        <div className="space-y-3 p-5">
+          {filtered.map((test) => (
+            <div key={test.id} className="rounded-xl border border-slate-100 bg-white p-4 hover:shadow-sm">
+              <div className="mb-3 flex items-start justify-between">
+                <div>
+                  <div className="mb-1 flex items-center gap-2"><h3 className="font-semibold text-slate-900">{test.test_name}</h3><PriorityBadge priority={test.priority} /></div>
+                  <div className="text-sm text-slate-600">Patient: {test.patient_first_name} {test.patient_last_name} ({test.patient_reg_no})</div>
+                  <div className="text-xs text-slate-500">Doctor: Dr. {test.doctor_first_name || ''} {test.doctor_last_name || ''}</div>
                 </div>
-              ))}
+                <StatusBadge status={test.status} />
+              </div>
+              <div className="mb-3 flex items-center gap-2 text-xs text-slate-500"><Calendar className="h-3.5 w-3.5" /><span>Requested: {new Date(test.request_date).toLocaleDateString()}</span></div>
+              <div className="flex gap-2">
+                <button className="flex flex-1 items-center justify-center gap-1.5 rounded-lg bg-blue-50 px-3 py-2 text-sm font-medium text-blue-600"><Eye className="h-3.5 w-3.5" />View</button>
+                <button onClick={() => openUpload(test)} disabled={test.status === 'completed'} className="flex flex-1 items-center justify-center gap-1.5 rounded-lg bg-emerald-50 px-3 py-2 text-sm font-medium text-emerald-600 disabled:opacity-50"><Upload className="h-3.5 w-3.5" />Upload Results</button>
+              </div>
             </div>
-          </div>
+          ))}
+          {!loading && filtered.length === 0 && <div className="rounded-lg border border-slate-100 p-8 text-center text-sm text-slate-500">No tests found for this department.</div>}
+          {loading && <div className="rounded-lg border border-slate-100 p-8 text-center text-sm text-slate-500">Loading tests...</div>}
         </div>
       </div>
-      
-      {/* Test Categories */}
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-        <div className="bg-gradient-to-br from-blue-50 to-blue-100 rounded-xl p-4">
-          <div className="flex items-center gap-2 mb-2">
-            <TestTube className="w-5 h-5 text-blue-600" />
-            <h3 className="font-semibold text-blue-900">Blood Tests</h3>
-          </div>
-          <p className="text-2xl font-bold text-blue-900">8</p>
-          <p className="text-xs text-blue-700 mt-1">Pending analysis</p>
-        </div>
-        <div className="bg-gradient-to-br from-purple-50 to-purple-100 rounded-xl p-4">
-          <div className="flex items-center gap-2 mb-2">
-            <Microscope className="w-5 h-5 text-purple-600" />
-            <h3 className="font-semibold text-purple-900">Pathology</h3>
-          </div>
-          <p className="text-2xl font-bold text-purple-900">4</p>
-          <p className="text-xs text-purple-700 mt-1">Pending analysis</p>
-        </div>
-        <div className="bg-gradient-to-br from-cyan-50 to-cyan-100 rounded-xl p-4">
-          <div className="flex items-center gap-2 mb-2">
-            <Activity className="w-5 h-5 text-cyan-600" />
-            <h3 className="font-semibold text-cyan-900">Imaging</h3>
-          </div>
-          <p className="text-2xl font-bold text-cyan-900">3</p>
-          <p className="text-xs text-cyan-700 mt-1">Pending analysis</p>
-        </div>
-        <div className="bg-gradient-to-br from-amber-50 to-amber-100 rounded-xl p-4">
-          <div className="flex items-center gap-2 mb-2">
-            <Heart className="w-5 h-5 text-amber-600" />
-            <h3 className="font-semibold text-amber-900">Cardiology</h3>
-          </div>
-          <p className="text-2xl font-bold text-amber-900">2</p>
-          <p className="text-xs text-amber-700 mt-1">Pending analysis</p>
-        </div>
-      </div>
-      
-      {/* Upload Modal */}
-      <UploadModal
-        isOpen={showUploadModal}
-        onClose={() => {
-          setShowUploadModal(false);
-          setSelectedTest(null);
-        }}
-        onUpload={handleUpload}
-      />
+
+      <UploadModal isOpen={showUploadModal} onClose={() => { setShowUploadModal(false); setSelectedTest(null); }} test={selectedTest} onSubmit={submitResult} />
     </div>
   );
 }

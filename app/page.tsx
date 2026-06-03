@@ -1,13 +1,8 @@
-import Image from "next/image";
 import Link from "next/link";
 import { Navbar } from "@/components/Navbar";
 import { Footer } from "@/components/Footer";
 import { SectionHeading } from "@/components/SectionHeading";
-import { DoctorCard } from "@/components/DoctorCard";
-import { doctors } from "@/data/doctors";
 import { departments } from "@/data/departments";
-import { hospitalInfo } from "@/data/hospital";
-import { Stethoscope, Heart, Users, Clock, HeartIcon } from "lucide-react";
 import HeroSection from "@/components/Home/HeroSection";
 import HomeAboutSection from "@/components/Home/HomeAboutSection";
 import HomeServicesSection from "@/components/Home/HomeServicesSection";
@@ -17,9 +12,26 @@ import DoctorsSection from "@/components/Home/DoctorHome";
 import DonationSection from "@/components/Home/DonationSection";
 import FAQSection from "@/components/Home/FaqSection";
 
-export default function Home() {
-  const featuredDoctors = doctors.slice(0, 3);
-  const featuredDepartments = departments.slice(0, 6);
+const apiBase = (process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000/api").replace(/\/api\/?$/, "");
+
+async function getHomeDepartments() {
+  try {
+    const res = await fetch(`${apiBase}/api/departments`, { next: { revalidate: 60 } });
+    if (!res.ok) return departments.slice(0, 6);
+    const body = await res.json();
+    const rows = Array.isArray(body?.data) ? body.data : [];
+    return rows.slice(0, 6).map((dept: any) => ({
+      ...dept,
+      id: String(dept.id),
+      image_url: dept.image_url?.startsWith("http") ? dept.image_url : dept.image_url ? `${apiBase}${dept.image_url}` : "",
+    }));
+  } catch {
+    return departments.slice(0, 6);
+  }
+}
+
+export default async function Home() {
+  const featuredDepartments = await getHomeDepartments();
 
   return (
     <>
@@ -40,7 +52,7 @@ export default function Home() {
               />
             </div>
             <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
-              {departments.map((dept) => (
+              {featuredDepartments.map((dept) => (
                 <DepartmentCard key={dept.id} department={dept} />
               ))}
             </div>

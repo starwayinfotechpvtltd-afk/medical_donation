@@ -14,7 +14,7 @@ import { useCallback } from 'react';
 export interface ApiResponse<T = unknown> {
   success: boolean;
   message: string;
-  data?: T;
+  data?: T; 
   meta?: {
     page?: number;
     limit?: number;

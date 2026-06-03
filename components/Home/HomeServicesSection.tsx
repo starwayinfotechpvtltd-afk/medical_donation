@@ -1,99 +1,3 @@
-// import Image from "next/image";
-// import React from "react";
-// import { Stethoscope, ArrowUpRight } from "lucide-react";
-
-// export default function HomeServicesSection() {
-//   const services = [
-//     {
-//       title: "Advanced Diagnostics",
-//       desc: "Precise and modern diagnostic solutions ensuring early detection and accurate treatment planning.",
-//       img: "/images/home/about_2.webp",
-//     },
-//     {
-//       title: "Dental Implants",
-//       desc: "State-of-the-art implant procedures designed to restore confidence and functionality.",
-//       img: "/images/home/about_2.webp",
-//     },
-//     {
-//       title: "Teeth Whitening",
-//       desc: "Professional whitening treatments delivering brighter smiles safely and effectively.",
-//       img: "/images/home/about_2.webp",
-//     },
-//     {
-//       title: "Cosmetic Dentistry",
-//       desc: "Enhancing smiles with aesthetic precision and personalized care solutions.",
-//       img: "/images/home/about_2.webp",
-//     },
-//   ];
-
-//   return (
-//     <section className="relative w-full py-24 bg-gradient-to-b from-white to-green-50">
-//       <div className="max-w-[70%] mx-auto">
-        
-//         {/* Section Header */}
-//         <div className="text-center mb-16">
-//           <span className="inline-block px-4 py-1.5 text-sm font-semibold tracking-wide text-green-700 bg-green-100 rounded-full">
-//             Our Services
-//           </span>
-
-//           <h2 className="mt-6 text-4xl lg:text-4xl font-extrabold text-gray-900 leading-tight">
-//             Modern Healthcare Solutions Designed<br />
-//             <span className="text-green-600"> Around You</span>
-//           </h2>
-
-//           <p className="mt-5 text-gray-600 mx-auto text-base md:text-lg">
-//             Delivering innovative medical and dental treatments with a patient-first approach and cutting-edge technology.
-//           </p>
-//         </div>
-
-//         {/* Services Grid */}
-//         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
-//           {services.map((item, index) => (
-//             <div
-//               key={index}
-//               className="group relative bg-white/70 backdrop-blur-xl border border-white/40 rounded-3xl overflow-hidden shadow-md hover:shadow-2xl transition-all duration-500 hover:-translate-y-2"
-//             >
-//               {/* Image */}
-//               <div className="relative w-full h-56 overflow-hidden">
-//                 <Image
-//                   src={item.img}
-//                   alt={item.title}
-//                   fill
-//                   className="object-cover transition-transform duration-700 group-hover:scale-110"
-//                 />
-//                 <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-black/10 to-transparent"></div>
-//               </div>
-
-//               {/* Content */}
-//               <div className="pt-10 pb-8 px-6">
-//                 <h4 className="text-lg font-bold text-gray-900 mb-3">
-//                   {item.title}
-//                 </h4>
-
-//                 <p className="text-gray-600 text-sm leading-relaxed mb-6">
-//                   {item.desc}
-//                 </p>
-
-//                 <button className="flex items-center gap-2 text-sm font-semibold text-green-600 group-hover:text-green-700 transition">
-//                   Learn More
-//                   <ArrowUpRight
-//                     size={16}
-//                     className="transition-transform duration-300 group-hover:translate-x-1 group-hover:-translate-y-1"
-//                   />
-//                 </button>
-//               </div>
-//             </div>
-//           ))}
-//         </div>
-//       </div>
-//     </section>
-//   );
-// }
-
-
-
-
-
 "use client";
 
 import Image from "next/image";
@@ -105,40 +9,56 @@ import "swiper/css";
 import "swiper/css/navigation";
 
 export default function HomeServicesSection() {
-  const services = [
-    {
-      title: "Advanced Diagnostics",
-      img: "/images/home/about_2.webp",
-    },
-    {
-      title: "Dental Implants",
-      img: "/images/home/about_2.webp",
-    },
-    {
-      title: "Teeth Whitening",
-      img: "/images/home/about_2.webp",
-    },
-    {
-      title: "Cosmetic Dentistry",
-      img: "/images/home/about_2.webp",
-    },
-    {
-      title: "Root Canal Therapy",
-      img: "/images/home/about_2.webp",
-    },
-    {
-      title: "Orthodontics",
-      img: "/images/home/about_2.webp",
-    },
-    {
-      title: "Pediatric Dentistry",
-      img: "/images/home/about_2.webp",
-    },
-    {
-      title: "Oral Surgery",
-      img: "/images/home/about_2.webp",
-    },
-  ];
+const services = [
+  {
+    title: "General Medicine",
+    img: "/images/services/1.webp",
+  },
+  {
+    title: "Cardiology",
+    img: "/images/services/2.webp",
+  },
+  {
+    title: "Neurology",
+    img: "/images/services/3.webp",
+  },
+  {
+    title: "Orthopedics",
+    img: "/images/services/4.webp",
+  },
+  {
+    title: "Pediatrics",
+    img: "/images/services/5.webp",
+  },
+  {
+    title: "Gynecology & Obstetrics",
+    img: "/images/services/6.webp",
+  },
+  {
+    title: "Nephrology",
+    img: "/images/services/7.webp",
+  },
+  {
+    title: "Urology",
+    img: "/images/services/8.webp",
+  },
+  {
+    title: "Oncology",
+    img: "/images/services/9.webp",
+  },
+  {
+    title: "Dermatology",
+    img: "/images/services/10.webp",
+  },
+  {
+    title: "ENT",
+    img: "/images/services/11.webp",
+  },
+  {
+    title: "Emergency & Trauma Care",
+    img: "/images/services/12.webp",
+  },
+];
 
   return (
     <section className="w-full py-16 bg-green-100/50 overflow-hidden">

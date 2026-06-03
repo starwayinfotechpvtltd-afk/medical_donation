@@ -505,7 +505,7 @@ const [lastUpdated] = useState(
                     </div>
                     <div className="flex items-center gap-2">
                       <Mail className="w-4 h-4 text-emerald-500" />
-                      <span className="text-sm text-slate-700">legal@mefigurefoundation.com</span>
+                      <span className="text-sm text-slate-700">mefigureceleb@gmail.com</span>
                     </div>
                     <div className="flex items-center gap-2">
                       <Building2 className="w-4 h-4 text-emerald-500" />
@@ -536,14 +536,14 @@ const [lastUpdated] = useState(
                 </div>
                 <div className="flex gap-3">
                   <a 
-                    href="mailto:legal@mefigurefoundation.com" 
+                    href="mailto:mefigureceleb@gmail.com" 
                     className="flex items-center gap-2 px-4 py-2 bg-white text-emerald-600 rounded-lg font-medium hover:bg-emerald-50 transition-colors"
                   >
                     <Mail className="w-4 h-4" />
                     Email Us
                   </a>
                   <a 
-                    href="tel:+918899700966" 
+                    href="tel:+91 8899700966" 
                     className="flex items-center gap-2 px-4 py-2 bg-emerald-500 text-white rounded-lg font-medium hover:bg-emerald-400 transition-colors"
                   >
                     <Phone className="w-4 h-4" />

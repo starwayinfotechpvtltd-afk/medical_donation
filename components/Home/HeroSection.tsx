@@ -157,7 +157,7 @@ export default function HeroSection() {
               </Link>
 
               <Link href="/donate">
-                <button className="flex items-center justify-center gap-2 px-6 py-3 rounded-xl border border-red-500 bg-red-500 hover:bg-red-600 text-white font-semibold text-sm transition">
+                <button className="flex items-center justify-center gap-2 px-6 py-3 rounded-xl border border-red-500 bg-red-500 hover:bg-red-600 text-white font-semibold text-sm transition cursor-pointer">
                   <Heart size={18} />
                   Donate Now
                 </button>

@@ -25,7 +25,7 @@ const emptyForm: StaffFormState = {
 };
 
 const roles = ['doctor', 'nurse', 'lab_technician', 'admin'];
-const addStaffRoles = ['nurse', 'lab_technician', 'admin'];
+const addStaffRoles = ['nurse', 'admin'];
 
 export default function StaffRolesPage() {
   const [users, setUsers] = useState<StaffUser[]>([]);

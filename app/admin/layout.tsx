@@ -22,6 +22,7 @@ const navigation = {
   management: [
     { href: '/admin/staff-roles', label: 'Staff & Roles', icon: Shield, exact: false },
     { href: '/admin/doctors', label: 'Doctors', icon: Stethoscope, exact: false },
+    { href: '/admin/lab-technicians', label: 'Lab Technicians', icon: TestTube, exact: false },
     { href: '/admin/patients', label: 'Patients', icon: Users, exact: false },
     { href: '/admin/appointments', label: 'Appointments', icon: Calendar, exact: false },
     { href: '/admin/lab-tests', label: 'Lab Tests', icon: FlaskConical, exact: false },
@@ -251,4 +252,3 @@ export default function AdminLayout({
     </AdminProtected>
   );
 }
-

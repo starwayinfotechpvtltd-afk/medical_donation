@@ -29,13 +29,13 @@ export const metadata: Metadata = {
     title: 'Mefigure Siddhi Vadanta Foundation Hospital',
     description: 'Empowering lives through healthcare and community support.',
     url: 'https://mefigurefoundation.com',
-    siteName: 'Me Figure Foundation',
+    siteName: 'Mefigure Siddhi Vadanta Foundation',
     images: [
       {
         url: '/mefigurelogo.png',
         width: 1200,
         height: 630,
-        alt: 'MeFigure Foundation',
+        alt: 'Mefigure Siddhi Vadanta Foundation',
       },
     ],
     locale: 'en_US',
