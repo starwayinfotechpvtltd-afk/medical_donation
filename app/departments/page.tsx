@@ -1,31 +1,66 @@
+// app\departments\page.tsx
 import { Navbar } from "@/components/Navbar";
 import { Footer } from "@/components/Footer";
 import { SectionHeading } from "@/components/SectionHeading";
 import { DepartmentCard } from "@/components/DepartmentCard";
 import { departments } from "@/data/departments";
+import PageHero from "@/components/PageHero";
+import { HeartHandshake } from "lucide-react";
+
+const apiBase = (process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000/api").replace(/\/api\/?$/, "");
 
 export const metadata = {
   title: "Our Departments - Explore Medical Specializations at Mefigure Siddhi Vadanta Foundation",
   description: "Explore our various medical departments and specializations.",
 };
 
-export default function Departments() {
+async function getDepartments() {
+  try {
+    const res = await fetch(`${apiBase}/api/departments`, { next: { revalidate: 60 } });
+    if (!res.ok) return departments;
+
+    const body = await res.json();
+    const rows = Array.isArray(body?.data) ? body.data : [];
+
+    if (rows.length === 0) return departments;
+
+    return rows.map((dept: any) => ({
+      ...dept,
+      id: String(dept.id),
+      image_url: dept.image_url?.startsWith("http")
+        ? dept.image_url
+        : dept.image_url
+          ? `${apiBase}${dept.image_url}`
+          : "",
+    }));
+  } catch {
+    return departments;
+  }
+}
+
+export default async function Departments() {
+  const departmentRows = await getDepartments();
+
   return (
     <>
       <Navbar />
       <main>
         {/* Hero Section */}
-        <section className="bg-gradient-to-r from-emerald-50 to-blue-50 py-16">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <h1 className="text-5xl md:text-6xl font-bold text-slate-900 mb-4 text-balance">
-              Our Departments
-            </h1>
-            <p className="text-xl text-slate-700 max-w-2xl">
-              Comprehensive healthcare services across multiple medical specializations at Mefigure Siddhi Vadanta Foundation.
-            </p>
-          </div>
-        </section>
-
+        <PageHero
+          badge="Our Departments"
+          icon={HeartHandshake}
+          title="Expert care for every stage of life."
+          description="From preventive care and diagnostics to advanced treatments and specialized services, our departments are dedicated to providing compassionate, patient-centered healthcare."
+          breadcrumb={[
+            {
+              label: "Home",
+              href: "/",
+            },
+            {
+              label: "Departments",
+            },
+          ]}
+        />
         {/* Departments Grid */}
         <section className="py-20 bg-slate-50">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -36,7 +71,7 @@ export default function Departments() {
             />
 
             <div className="grid md:grid-cols-3 gap-8 mb-12">
-              {departments.map((department) => (
+              {departmentRows.map((department) => (
                 <DepartmentCard key={department.id} department={department} showDetails />
               ))}
             </div>
