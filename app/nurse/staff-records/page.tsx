@@ -1,97 +1,91 @@
 'use client';
 
-import { Users, Calendar, TrendingUp, Award } from 'lucide-react';
+import { useEffect, useState } from 'react';
+import { ClipboardList, RefreshCw } from 'lucide-react';
+import { NurseSidebar } from '@/components/NurseSidebar';
+import { nurseApi, type AssignedPatient } from '@/lib/nurse-api';
 
-const staffRecords = [
-  { id: 1, name: 'Aisha Khan', shift: 'Day Shift', attendance: 24, performance: 95, department: 'General Ward' },
-  { id: 2, name: 'Rajesh Verma', shift: 'Night Shift', attendance: 23, performance: 92, department: 'ICU' },
-  { id: 3, name: 'Priya Nair', shift: 'Day Shift', attendance: 25, performance: 98, department: 'Pediatrics' },
-  { id: 4, name: 'Ahmed Hassan', shift: 'Morning Shift', attendance: 22, performance: 88, department: 'Emergency' },
-];
+const fmtDate = (value?: string | null) => (value ? String(value).slice(0, 10) : '-');
+const fmtTime = (value?: string | null) => (value ? String(value).slice(0, 5) : '-');
 
-export default function StaffRecordsPage() {
+export default function NurseAssignmentRecordsPage() {
+  const [patients, setPatients] = useState<AssignedPatient[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState('');
+
+  const load = async () => {
+    setLoading(true);
+    setError('');
+    try {
+      setPatients(await nurseApi.getAssignedPatients());
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to load assignment records.');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    void load();
+  }, []);
+
   return (
-    <div className="p-8 bg-gradient-to-br from-blue-50 to-sky-50 min-h-screen">
-      <div className="max-w-6xl mx-auto">
-        <div className="mb-8">
-          <h1 className="text-4xl font-bold text-slate-900 mb-2">Staff Records</h1>
-          <p className="text-slate-600">View nursing staff performance and attendance records</p>
-        </div>
+    <div className="flex min-h-screen bg-slate-50">
+      <NurseSidebar />
+      <main className="ml-64 flex-1 p-6">
+        <div className="mx-auto max-w-7xl space-y-6">
+          <div className="flex flex-wrap items-end justify-between gap-3">
+            <div>
+              <h1 className="text-3xl font-semibold text-slate-900">Assignment Records</h1>
+              <p className="mt-1 text-sm text-slate-500">Read-only list of patients assigned to you by nurse admin.</p>
+            </div>
+            <button onClick={load} className="inline-flex items-center gap-2 rounded-lg border bg-white px-4 py-2 text-sm">
+              <RefreshCw className="h-4 w-4" />
+              Refresh
+            </button>
+          </div>
 
-        {/* Summary Stats */}
-        <div className="grid md:grid-cols-4 gap-4 mb-8">
-          <div className="bg-white rounded-xl shadow-sm p-6 border-l-4 border-blue-500">
-            <div className="flex items-center gap-3 mb-2">
-              <Users className="w-5 h-5 text-blue-500" />
-              <p className="text-slate-600 text-sm">Total Staff</p>
-            </div>
-            <p className="text-3xl font-bold text-slate-900">24</p>
-          </div>
-          <div className="bg-white rounded-xl shadow-sm p-6 border-l-4 border-green-500">
-            <div className="flex items-center gap-3 mb-2">
-              <Calendar className="w-5 h-5 text-green-500" />
-              <p className="text-slate-600 text-sm">Present Today</p>
-            </div>
-            <p className="text-3xl font-bold text-slate-900">22</p>
-          </div>
-          <div className="bg-white rounded-xl shadow-sm p-6 border-l-4 border-purple-500">
-            <div className="flex items-center gap-3 mb-2">
-              <TrendingUp className="w-5 h-5 text-purple-500" />
-              <p className="text-slate-600 text-sm">Avg Attendance</p>
-            </div>
-            <p className="text-3xl font-bold text-slate-900">96%</p>
-          </div>
-          <div className="bg-white rounded-xl shadow-sm p-6 border-l-4 border-orange-500">
-            <div className="flex items-center gap-3 mb-2">
-              <Award className="w-5 h-5 text-orange-500" />
-              <p className="text-slate-600 text-sm">Avg Performance</p>
-            </div>
-            <p className="text-3xl font-bold text-slate-900">93%</p>
-          </div>
-        </div>
+          {error ? <div className="rounded-lg border border-red-200 bg-red-50 p-4 text-sm text-red-700">{error}</div> : null}
 
-        {/* Staff Table */}
-        <div className="bg-white rounded-xl shadow-sm overflow-hidden">
-          <div className="overflow-x-auto">
-            <table className="w-full">
-              <thead>
-                <tr className="bg-blue-50 border-b border-blue-100">
-                  <th className="px-6 py-4 text-left text-sm font-semibold text-slate-900">Name</th>
-                  <th className="px-6 py-4 text-left text-sm font-semibold text-slate-900">Shift</th>
-                  <th className="px-6 py-4 text-left text-sm font-semibold text-slate-900">Department</th>
-                  <th className="px-6 py-4 text-left text-sm font-semibold text-slate-900">Days Present</th>
-                  <th className="px-6 py-4 text-left text-sm font-semibold text-slate-900">Performance</th>
-                </tr>
-              </thead>
-              <tbody>
-                {staffRecords.map((staff) => (
-                  <tr key={staff.id} className="border-b border-blue-50 hover:bg-blue-50 transition-colors">
-                    <td className="px-6 py-4 text-sm font-semibold text-slate-900">{staff.name}</td>
-                    <td className="px-6 py-4 text-sm text-slate-600">{staff.shift}</td>
-                    <td className="px-6 py-4 text-sm text-slate-600">{staff.department}</td>
-                    <td className="px-6 py-4">
-                      <div className="flex items-center gap-2">
-                        <div className="flex-1 bg-blue-100 rounded-full h-2 max-w-xs">
-                          <div className="bg-blue-500 h-2 rounded-full" style={{ width: `${(staff.attendance / 25) * 100}%` }}></div>
-                        </div>
-                        <span className="text-sm font-semibold text-slate-900">{staff.attendance}/25</span>
-                      </div>
-                    </td>
-                    <td className="px-6 py-4">
-                      <div className="flex items-center gap-2">
-                        <div className="flex-1 bg-green-100 rounded-full h-2 max-w-xs">
-                          <div className="bg-green-500 h-2 rounded-full" style={{ width: `${staff.performance}%` }}></div>
-                        </div>
-                        <span className="text-sm font-semibold text-slate-900">{staff.performance}%</span>
-                      </div>
-                    </td>
+          <div className="rounded-lg border bg-white p-5">
+            <div className="overflow-x-auto">
+              <table className="min-w-full text-left text-sm">
+                <thead className="border-b text-xs uppercase text-slate-500">
+                  <tr>
+                    <th className="py-3 pr-4">Patient</th>
+                    <th className="py-3 pr-4">Appointment</th>
+                    <th className="py-3 pr-4">Doctor</th>
+                    <th className="py-3 pr-4">Department</th>
+                    <th className="py-3 pr-4">Status</th>
+                    <th className="py-3 pr-4">Notes</th>
                   </tr>
-                ))}
-              </tbody>
-            </table>
+                </thead>
+                <tbody>
+                  {patients.map((patient) => (
+                    <tr key={patient.assignment_id} className="border-b last:border-0">
+                      <td className="py-3 pr-4">
+                        <div className="flex items-center gap-2">
+                          <ClipboardList className="h-4 w-4 text-pink-600" />
+                          <div>
+                            <p className="font-medium text-slate-900">{patient.first_name} {patient.last_name}</p>
+                            <p className="text-xs text-slate-500">{patient.registration_no || patient.phone || '-'}</p>
+                          </div>
+                        </div>
+                      </td>
+                      <td className="py-3 pr-4">{fmtDate(patient.scheduled_date)} {fmtTime(patient.scheduled_time)}</td>
+                      <td className="py-3 pr-4">{patient.doctor_first_name ? `${patient.doctor_first_name} ${patient.doctor_last_name}` : '-'}</td>
+                      <td className="py-3 pr-4">{patient.department_name || '-'}</td>
+                      <td className="py-3 pr-4">{patient.assignment_status}</td>
+                      <td className="py-3 pr-4">{patient.assignment_notes || '-'}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+              {!loading && !patients.length ? <p className="py-6 text-sm text-slate-500">No assignment records found.</p> : null}
+            </div>
           </div>
         </div>
-      </div>
+      </main>
     </div>
   );
 }

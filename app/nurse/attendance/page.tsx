@@ -1,112 +1,101 @@
 'use client';
 
-import { useState } from 'react';
-import { Calendar, Clock, Camera, CheckCircle, AlertCircle } from 'lucide-react';
+import { useEffect, useState } from 'react';
+import { CheckCircle2, Clock, RefreshCw } from 'lucide-react';
+import { NurseSidebar } from '@/components/NurseSidebar';
+import { nurseApi, type CareTask } from '@/lib/nurse-api';
 
-const attendanceData = [
-  { id: 1, date: '2024-03-24', checkIn: '08:00 AM', checkOut: '04:00 PM', status: 'Present' },
-  { id: 2, date: '2024-03-23', checkIn: '08:15 AM', checkOut: '04:30 PM', status: 'Present' },
-  { id: 3, date: '2024-03-22', checkIn: '08:00 AM', checkOut: null, status: 'Present' },
-];
+const today = () => new Date().toISOString().slice(0, 10);
+const fmtDate = (value?: string | null) => (value ? String(value).slice(0, 10) : '-');
+const fmtTime = (value?: string | null) => (value ? String(value).slice(0, 5) : '-');
 
-export default function AttendancePage() {
-  const [showPhotoModal, setShowPhotoModal] = useState(false);
-  const [photoPreview, setPhotoPreview] = useState<string | null>(null);
+export default function NurseTimetablePage() {
+  const [tasks, setTasks] = useState<CareTask[]>([]);
+  const [dateFrom, setDateFrom] = useState(today());
+  const [dateTo, setDateTo] = useState(today());
+  const [status, setStatus] = useState('');
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState('');
+
+  const load = async () => {
+    setLoading(true);
+    setError('');
+    try {
+      setTasks(await nurseApi.getTimetable({ date_from: dateFrom || undefined, date_to: dateTo || undefined, status: status || undefined }));
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to load timetable.');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    void load();
+  }, [dateFrom, dateTo, status]);
+
+  const updateStatus = async (task: CareTask, nextStatus: CareTask['status']) => {
+    await nurseApi.updateTimetableEntry(task.id, { status: nextStatus });
+    await load();
+  };
 
   return (
-    <div className="p-8 bg-gradient-to-br from-blue-50 to-sky-50 min-h-screen">
-      <div className="max-w-6xl mx-auto">
-        <div className="mb-8">
-          <h1 className="text-4xl font-bold text-slate-900 mb-2">Attendance Management</h1>
-          <p className="text-slate-600">Track your daily attendance and check-in times</p>
-        </div>
-
-        {/* Quick Actions */}
-        <div className="grid md:grid-cols-2 gap-6 mb-8">
-          <button className="bg-white rounded-xl p-6 shadow-sm hover:shadow-md transition-shadow border-l-4 border-blue-500">
-            <div className="flex items-center gap-4">
-              <div className="bg-blue-100 p-3 rounded-lg">
-                <Clock className="w-6 h-6 text-blue-600" />
-              </div>
-              <div className="text-left">
-                <p className="text-slate-600 text-sm">Check In Time</p>
-                <p className="text-2xl font-bold text-slate-900">08:00 AM</p>
-              </div>
+    <div className="flex min-h-screen bg-slate-50">
+      <NurseSidebar />
+      <main className="ml-64 flex-1 p-6">
+        <div className="mx-auto max-w-7xl space-y-6">
+          <div className="flex flex-wrap items-end justify-between gap-3">
+            <div>
+              <h1 className="text-3xl font-semibold text-slate-900">Care Timetable</h1>
+              <p className="mt-1 text-sm text-slate-500">Track medicine, checkup, vitals, and nursing care tasks.</p>
             </div>
-          </button>
-
-          <button onClick={() => setShowPhotoModal(true)} className="bg-white rounded-xl p-6 shadow-sm hover:shadow-md transition-shadow border-l-4 border-purple-500">
-            <div className="flex items-center gap-4">
-              <div className="bg-purple-100 p-3 rounded-lg">
-                <Camera className="w-6 h-6 text-purple-600" />
-              </div>
-              <div className="text-left">
-                <p className="text-slate-600 text-sm">Take Attendance Photo</p>
-                <p className="text-sm font-semibold text-purple-600">Capture Now</p>
-              </div>
-            </div>
-          </button>
-        </div>
-
-        {/* Attendance History */}
-        <div className="bg-white rounded-xl shadow-sm p-6">
-          <h2 className="text-2xl font-bold text-slate-900 mb-6">Attendance History</h2>
-          <div className="overflow-x-auto">
-            <table className="w-full">
-              <thead>
-                <tr className="bg-blue-50 border-b border-blue-100">
-                  <th className="px-6 py-3 text-left text-sm font-semibold text-slate-900">Date</th>
-                  <th className="px-6 py-3 text-left text-sm font-semibold text-slate-900">Check In</th>
-                  <th className="px-6 py-3 text-left text-sm font-semibold text-slate-900">Check Out</th>
-                  <th className="px-6 py-3 text-left text-sm font-semibold text-slate-900">Status</th>
-                </tr>
-              </thead>
-              <tbody>
-                {attendanceData.map((record) => (
-                  <tr key={record.id} className="border-b border-blue-50 hover:bg-blue-50 transition-colors">
-                    <td className="px-6 py-4 text-sm text-slate-900">{record.date}</td>
-                    <td className="px-6 py-4 text-sm text-slate-900">{record.checkIn}</td>
-                    <td className="px-6 py-4 text-sm text-slate-900">{record.checkOut || 'On Duty'}</td>
-                    <td className="px-6 py-4 text-sm">
-                      <span className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-green-100 text-green-700 text-xs font-semibold">
-                        <CheckCircle className="w-4 h-4" />
-                        {record.status}
-                      </span>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
+            <button onClick={load} className="inline-flex items-center gap-2 rounded-lg border bg-white px-4 py-2 text-sm">
+              <RefreshCw className="h-4 w-4" />
+              Refresh
+            </button>
           </div>
-        </div>
 
-        {/* Photo Modal */}
-        {showPhotoModal && (
-          <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50">
-            <div className="bg-white rounded-xl max-w-md w-full p-6">
-              <h3 className="text-2xl font-bold text-slate-900 mb-4">Attendance Photo</h3>
-              <div className="bg-blue-50 rounded-lg p-8 flex flex-col items-center justify-center mb-6 border-2 border-dashed border-blue-300">
-                {photoPreview ? (
-                  <img src={photoPreview} alt="Attendance" className="w-full rounded-lg" />
-                ) : (
-                  <div className="text-center">
-                    <Camera className="w-12 h-12 text-blue-400 mx-auto mb-2" />
-                    <p className="text-slate-600">No photo selected</p>
+          <div className="grid gap-3 rounded-lg border bg-white p-4 md:grid-cols-3">
+            <input type="date" value={dateFrom} onChange={(e) => setDateFrom(e.target.value)} className="rounded-lg border px-3 py-2 text-sm" />
+            <input type="date" value={dateTo} onChange={(e) => setDateTo(e.target.value)} className="rounded-lg border px-3 py-2 text-sm" />
+            <select value={status} onChange={(e) => setStatus(e.target.value)} className="rounded-lg border px-3 py-2 text-sm">
+              <option value="">All status</option>
+              <option value="pending">pending</option>
+              <option value="done">done</option>
+              <option value="missed">missed</option>
+              <option value="cancelled">cancelled</option>
+            </select>
+          </div>
+
+          {error ? <div className="rounded-lg border border-red-200 bg-red-50 p-4 text-sm text-red-700">{error}</div> : null}
+
+          <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
+            {tasks.map((task) => (
+              <div key={task.id} className="rounded-lg border bg-white p-4 shadow-sm">
+                <div className="flex items-start justify-between gap-3">
+                  <div>
+                    <p className="font-semibold text-slate-900">{task.title}</p>
+                    <p className="text-sm text-slate-500">{task.patient_first_name} {task.patient_last_name}</p>
+                    <p className="text-sm text-slate-500">{fmtDate(task.scheduled_date)} {fmtTime(task.scheduled_time)}</p>
+                    <p className="mt-1 text-xs text-slate-500">{task.notes || task.medicine_name || ''}</p>
                   </div>
-                )}
+                  <span className="rounded-full bg-slate-100 px-2 py-1 text-xs">{task.status}</span>
+                </div>
+                <div className="mt-4 flex flex-wrap gap-2">
+                  <button onClick={() => updateStatus(task, 'done')} className="inline-flex items-center gap-1 rounded-lg border px-3 py-1.5 text-xs">
+                    <CheckCircle2 className="h-3.5 w-3.5" />
+                    Done
+                  </button>
+                  <button onClick={() => updateStatus(task, 'missed')} className="inline-flex items-center gap-1 rounded-lg border px-3 py-1.5 text-xs">
+                    <Clock className="h-3.5 w-3.5" />
+                    Missed
+                  </button>
+                </div>
               </div>
-              <div className="flex gap-3">
-                <button className="flex-1 px-4 py-2 bg-slate-200 text-slate-900 rounded-lg font-semibold hover:bg-slate-300 transition-colors">
-                  Cancel
-                </button>
-                <button onClick={() => setShowPhotoModal(false)} className="flex-1 px-4 py-2 bg-blue-500 text-white rounded-lg font-semibold hover:bg-blue-600 transition-colors">
-                  Submit
-                </button>
-              </div>
-            </div>
+            ))}
           </div>
-        )}
-      </div>
+          {!loading && !tasks.length ? <div className="rounded-lg border bg-white p-8 text-sm text-slate-500">No timetable tasks found.</div> : null}
+        </div>
+      </main>
     </div>
   );
 }

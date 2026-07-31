@@ -1,0 +1,82 @@
+'use client';
+
+import { Doctor } from '../types';
+import { Search, Star } from 'lucide-react';
+
+interface DoctorsTabProps {
+  doctors: Doctor[];
+  searchTerm: string;
+  setSearchTerm: (term: string) => void;
+  getStatusColor: (status: string) => string;
+}
+
+export default function DoctorsTab({ doctors, searchTerm, setSearchTerm, getStatusColor }: DoctorsTabProps) {
+  
+  const filteredDoctors = doctors.filter(d =>
+    d.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    d.specialty.toLowerCase().includes(searchTerm.toLowerCase())
+  );
+
+  return (
+    <>
+      <div className="flex justify-between items-center mb-6">
+        <div>
+          <h2 className="text-xl font-bold text-gray-900">Doctors</h2>
+          <p className="text-gray-600">View all doctors and their availability</p>
+        </div>
+        <div className="relative">
+          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
+          <input
+            type="text"
+            placeholder="Search doctors..."
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            className="pl-10 pr-4 py-2 border border-gray-300 rounded-lg"
+          />
+        </div>
+      </div>
+
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        {filteredDoctors.map((doctor) => (
+          <div key={doctor.id} className="bg-white rounded-xl shadow-sm border border-gray-200 p-6 hover:shadow-lg transition-shadow">
+            <div className="flex items-center gap-4 mb-4">
+              <img src={doctor.avatar} alt={doctor.name} className="w-16 h-16 rounded-full" />
+              <div>
+                <h3 className="font-semibold text-gray-900">{doctor.name}</h3>
+                <p className="text-sm text-gray-500">{doctor.specialty}</p>
+                <div className="flex items-center gap-1 mt-1">
+                  <Star className="w-3 h-3 text-yellow-400 fill-current" />
+                  <span className="text-xs text-gray-600">{doctor.rating}</span>
+                </div>
+              </div>
+            </div>
+            <div className="space-y-2 text-sm">
+              <div className="flex justify-between">
+                <span className="text-gray-500">Qualification</span>
+                <span className="text-gray-900">{doctor.qualification}</span>
+              </div>
+              <div className="flex justify-between">
+                <span className="text-gray-500">Experience</span>
+                <span className="text-gray-900">{doctor.experience} years</span>
+              </div>
+              <div className="flex justify-between">
+                <span className="text-gray-500">Room</span>
+                <span className="text-gray-900">{doctor.room}</span>
+              </div>
+              <div className="flex justify-between">
+                <span className="text-gray-500">Status</span>
+                <span className={`px-2 py-0.5 text-xs font-medium rounded-full ${getStatusColor(doctor.availability)}`}>
+                  {doctor.availability}
+                </span>
+              </div>
+              <div className="flex justify-between">
+                <span className="text-gray-500">Patients</span>
+                <span className="text-gray-900">{doctor.patientsCount}</span>
+              </div>
+            </div>
+          </div>
+        ))}
+      </div>
+    </>
+  );
+}

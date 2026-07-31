@@ -8,9 +8,9 @@ import { useRouter } from 'next/navigation';
 
 const nurseNavItems = [
   { name: 'Dashboard', href: '/nurse', icon: LayoutDashboard },
-  { name: 'Attendance', href: '/nurse/attendance', icon: Calendar },
+  { name: 'Care Timetable', href: '/nurse/attendance', icon: Calendar },
   { name: 'Patient Lookup', href: '/nurse/patient-lookup', icon: Users },
-  { name: 'Staff Records', href: '/nurse/staff-records', icon: ClipboardList },
+  { name: 'Assignments', href: '/nurse/staff-records', icon: ClipboardList },
 ];
 
 export function NurseSidebar() {

@@ -161,7 +161,6 @@ export default function DoctorsSection() {
             View All Doctors
           </Link>
         </div>
-
       </div>
     </section>
   );

@@ -1,141 +1,170 @@
 'use client';
 
-import { useState } from 'react';
-import { Search, User, Heart, AlertCircle, Phone, MapPin } from 'lucide-react';
+import type React from 'react';
+import { useEffect, useMemo, useState } from 'react';
+import { AlertCircle, Phone, RefreshCw, Search, User } from 'lucide-react';
+import { NurseSidebar } from '@/components/NurseSidebar';
+import { nurseApi, type AssignedPatient, type PatientDetail } from '@/lib/nurse-api';
 
-const patientDatabase = [
-  { id: 'P001', name: 'John Sharma', age: 45, ward: 'Ward A-101', doctor: 'Dr. Rajesh Kumar', bloodType: 'O+', phone: '9876543210', status: 'Admitted' },
-  { id: 'P002', name: 'Priya Patel', age: 32, ward: 'Ward B-205', doctor: 'Dr. Anjali Singh', bloodType: 'AB+', phone: '9876543211', status: 'Admitted' },
-  { id: 'P003', name: 'Amit Kumar', age: 58, ward: 'Ward C-312', doctor: 'Dr. Rajesh Kumar', bloodType: 'B+', phone: '9876543212', status: 'Critical' },
-];
+const fmtDate = (value?: string | null) => (value ? String(value).slice(0, 10) : '-');
+const fmtTime = (value?: string | null) => (value ? String(value).slice(0, 5) : '-');
 
 export default function PatientLookupPage() {
-  const [searchId, setSearchId] = useState('');
-  const [selectedPatient, setSelectedPatient] = useState<typeof patientDatabase[0] | null>(null);
+  const [patients, setPatients] = useState<AssignedPatient[]>([]);
+  const [selected, setSelected] = useState<PatientDetail | null>(null);
+  const [search, setSearch] = useState('');
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState('');
 
-  const handleSearch = (id: string) => {
-    const patient = patientDatabase.find(p => p.id.toLowerCase() === id.toLowerCase());
-    setSelectedPatient(patient || null);
+  const load = async () => {
+    setLoading(true);
+    setError('');
+    try {
+      const rows = await nurseApi.getAssignedPatients();
+      setPatients(rows);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to load assigned patients.');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    void load();
+  }, []);
+
+  const filtered = useMemo(() => {
+    const term = search.toLowerCase().trim();
+    if (!term) return patients;
+    return patients.filter((patient) =>
+      `${patient.first_name} ${patient.last_name} ${patient.registration_no || ''} ${patient.phone || ''}`
+        .toLowerCase()
+        .includes(term)
+    );
+  }, [patients, search]);
+
+  const openPatient = async (patientId: number) => {
+    setError('');
+    try {
+      setSelected(await nurseApi.getPatientDetail(patientId));
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to load patient details.');
+    }
   };
 
   return (
-    <div className="p-8 bg-gradient-to-br from-blue-50 to-sky-50 min-h-screen">
-      <div className="max-w-6xl mx-auto">
-        <div className="mb-8">
-          <h1 className="text-4xl font-bold text-slate-900 mb-2">Patient Lookup</h1>
-          <p className="text-slate-600">Search patient by ID to view details and vitals</p>
-        </div>
-
-        {/* Search Bar */}
-        <div className="bg-white rounded-xl shadow-sm p-6 mb-8">
-          <div className="flex gap-3">
-            <div className="flex-1 relative">
-              <Search className="absolute left-4 top-3 text-blue-400 w-5 h-5" />
-              <input
-                type="text"
-                placeholder="Enter Patient ID (e.g., P001)"
-                value={searchId}
-                onChange={(e) => setSearchId(e.target.value)}
-                className="w-full pl-12 pr-4 py-2 border border-blue-200 rounded-lg focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-200"
-              />
+    <div className="flex min-h-screen bg-slate-50">
+      <NurseSidebar />
+      <main className="ml-64 flex-1 p-6">
+        <div className="mx-auto max-w-7xl space-y-6">
+          <div className="flex flex-wrap items-end justify-between gap-3">
+            <div>
+              <h1 className="text-3xl font-semibold text-slate-900">Assigned Patient Lookup</h1>
+              <p className="mt-1 text-sm text-slate-500">Search and open only patients assigned to you by nurse admin.</p>
             </div>
-            <button onClick={() => handleSearch(searchId)} className="px-6 py-2 bg-blue-500 text-white rounded-lg font-semibold hover:bg-blue-600 transition-colors">
-              Search
+            <button onClick={load} className="inline-flex items-center gap-2 rounded-lg border bg-white px-4 py-2 text-sm">
+              <RefreshCw className="h-4 w-4" />
+              Refresh
             </button>
           </div>
+
+          <div className="relative rounded-lg border bg-white p-4">
+            <Search className="absolute left-7 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
+            <input value={search} onChange={(e) => setSearch(e.target.value)} className="w-full rounded-lg border px-10 py-2 text-sm" placeholder="Search name, registration number, phone" />
+          </div>
+
+          {error ? <div className="rounded-lg border border-red-200 bg-red-50 p-4 text-sm text-red-700">{error}</div> : null}
+
+          <div className="grid gap-6 lg:grid-cols-[380px_1fr]">
+            <section className="rounded-lg border bg-white p-5">
+              <h2 className="text-lg font-semibold text-slate-900">Assigned Patients</h2>
+              <div className="mt-4 space-y-3">
+                {filtered.map((patient) => (
+                  <button key={patient.assignment_id} onClick={() => openPatient(patient.patient_id)} className="w-full rounded-lg border p-4 text-left text-sm hover:bg-pink-50">
+                    <p className="font-semibold text-slate-900">{patient.first_name} {patient.last_name}</p>
+                    <p className="text-slate-500">{patient.registration_no || patient.phone || '-'}</p>
+                    <p className="mt-1 text-xs text-slate-500">Appointment: {fmtDate(patient.scheduled_date)} {fmtTime(patient.scheduled_time)}</p>
+                  </button>
+                ))}
+                {!loading && !filtered.length ? <p className="text-sm text-slate-500">No assigned patients found.</p> : null}
+              </div>
+            </section>
+
+            <section className="rounded-lg border bg-white p-5">
+              {selected?.patient ? (
+                <div className="space-y-6">
+                  <div className="flex items-start justify-between gap-4">
+                    <div className="flex items-center gap-3">
+                      <div className="rounded-lg bg-pink-50 p-3 text-pink-600">
+                        <User className="h-6 w-6" />
+                      </div>
+                      <div>
+                        <h2 className="text-2xl font-semibold text-slate-900">{selected.patient.first_name} {selected.patient.last_name}</h2>
+                        <p className="text-sm text-slate-500">{selected.patient.registration_no || 'No registration number'}</p>
+                      </div>
+                    </div>
+                    <span className="rounded-full bg-slate-100 px-3 py-1 text-xs font-medium text-slate-700">Assigned</span>
+                  </div>
+
+                  <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
+                    <Info label="Phone" value={selected.patient.phone || '-'} icon={<Phone className="h-4 w-4" />} />
+                    <Info label="Gender" value={selected.patient.gender || '-'} />
+                    <Info label="Blood Type" value={selected.patient.blood_type || '-'} />
+                    <Info label="Allergies" value={selected.patient.allergies || '-'} />
+                    <Info label="Conditions" value={selected.patient.chronic_conditions || '-'} />
+                    <Info label="Emergency" value={selected.patient.emergency_phone || selected.patient.emergency_contact || '-'} />
+                  </div>
+
+                  <div>
+                    <h3 className="text-lg font-semibold text-slate-900">Prescribed Medicines</h3>
+                    <div className="mt-3 grid gap-3 md:grid-cols-2">
+                      {selected.prescriptions.flatMap((prescription) => prescription.medicines.map((medicine) => (
+                        <div key={`${prescription.id}-${medicine.id}`} className="rounded-lg border p-3 text-sm">
+                          <p className="font-medium text-slate-900">{medicine.medicine_name}</p>
+                          <p className="text-slate-500">{[medicine.dosage, medicine.frequency, medicine.duration].filter(Boolean).join(' | ') || '-'}</p>
+                          <p className="text-xs text-slate-500">{medicine.instructions || ''}</p>
+                        </div>
+                      )))}
+                      {!selected.prescriptions.flatMap((p) => p.medicines).length ? <p className="text-sm text-slate-500">No medicines found.</p> : null}
+                    </div>
+                  </div>
+
+                  <div>
+                    <h3 className="text-lg font-semibold text-slate-900">Timetable</h3>
+                    <div className="mt-3 grid gap-3 md:grid-cols-2">
+                      {selected.timetable.map((task) => (
+                        <div key={task.id} className="rounded-lg border p-3 text-sm">
+                          <div className="flex justify-between gap-3">
+                            <p className="font-medium text-slate-900">{task.title}</p>
+                            <span className="text-xs text-slate-500">{task.status}</span>
+                          </div>
+                          <p className="text-slate-500">{task.task_type} | {fmtDate(task.scheduled_date)} {fmtTime(task.scheduled_time)}</p>
+                        </div>
+                      ))}
+                      {!selected.timetable.length ? <p className="text-sm text-slate-500">No timetable entries yet.</p> : null}
+                    </div>
+                  </div>
+                </div>
+              ) : (
+                <div className="flex min-h-72 flex-col items-center justify-center text-center">
+                  <AlertCircle className="mb-3 h-10 w-10 text-slate-300" />
+                  <p className="font-medium text-slate-900">Select a patient</p>
+                  <p className="text-sm text-slate-500">Patient details are available only for your active assignments.</p>
+                </div>
+              )}
+            </section>
+          </div>
         </div>
+      </main>
+    </div>
+  );
+}
 
-        {/* Patient Details */}
-        {selectedPatient ? (
-          <div className="grid md:grid-cols-3 gap-6">
-            <div className="md:col-span-2">
-              <div className="bg-white rounded-xl shadow-sm p-8 mb-6">
-                <div className="flex items-start justify-between mb-6">
-                  <div className="flex items-center gap-4">
-                    <div className="bg-blue-100 p-4 rounded-lg">
-                      <User className="w-8 h-8 text-blue-600" />
-                    </div>
-                    <div>
-                      <h2 className="text-3xl font-bold text-slate-900">{selectedPatient.name}</h2>
-                      <p className="text-slate-600">ID: {selectedPatient.id}</p>
-                    </div>
-                  </div>
-                  <span className={`px-4 py-2 rounded-full font-semibold text-sm ${selectedPatient.status === 'Critical' ? 'bg-red-100 text-red-700' : 'bg-green-100 text-green-700'}`}>
-                    {selectedPatient.status}
-                  </span>
-                </div>
-
-                <div className="grid md:grid-cols-2 gap-6 border-t border-blue-100 pt-6">
-                  <div>
-                    <p className="text-slate-600 text-sm mb-1">Age</p>
-                    <p className="text-2xl font-bold text-slate-900">{selectedPatient.age} years</p>
-                  </div>
-                  <div>
-                    <p className="text-slate-600 text-sm mb-1">Blood Type</p>
-                    <p className="text-2xl font-bold text-slate-900">{selectedPatient.bloodType}</p>
-                  </div>
-                  <div>
-                    <p className="text-slate-600 text-sm mb-1">Ward</p>
-                    <p className="text-lg font-semibold text-slate-900 flex items-center gap-2">
-                      <MapPin className="w-4 h-4 text-blue-500" />
-                      {selectedPatient.ward}
-                    </p>
-                  </div>
-                  <div>
-                    <p className="text-slate-600 text-sm mb-1">Contact</p>
-                    <p className="text-lg font-semibold text-slate-900 flex items-center gap-2">
-                      <Phone className="w-4 h-4 text-blue-500" />
-                      {selectedPatient.phone}
-                    </p>
-                  </div>
-                </div>
-              </div>
-
-              {/* Vitals */}
-              <div className="bg-white rounded-xl shadow-sm p-8">
-                <h3 className="text-2xl font-bold text-slate-900 mb-6">Current Vitals</h3>
-                <div className="grid md:grid-cols-4 gap-4">
-                  {[
-                    { label: 'Heart Rate', value: '78', unit: 'bpm' },
-                    { label: 'Blood Pressure', value: '120/80', unit: 'mmHg' },
-                    { label: 'Temperature', value: '98.6', unit: '°F' },
-                    { label: 'O2 Saturation', value: '98', unit: '%' },
-                  ].map((vital, idx) => (
-                    <div key={idx} className="bg-blue-50 rounded-lg p-4">
-                      <p className="text-slate-600 text-sm mb-2">{vital.label}</p>
-                      <p className="text-2xl font-bold text-slate-900">{vital.value}</p>
-                      <p className="text-slate-500 text-xs mt-1">{vital.unit}</p>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            </div>
-
-            {/* Assigned Doctor */}
-            <div className="bg-white rounded-xl shadow-sm p-6">
-              <h3 className="text-lg font-bold text-slate-900 mb-4">Assigned Doctor</h3>
-              <div className="bg-blue-50 rounded-lg p-4">
-                <div className="bg-blue-100 w-12 h-12 rounded-full flex items-center justify-center mb-3">
-                  <User className="w-6 h-6 text-blue-600" />
-                </div>
-                <p className="font-bold text-slate-900">{selectedPatient.doctor}</p>
-                <p className="text-slate-600 text-sm mt-1">Cardiology</p>
-              </div>
-            </div>
-          </div>
-        ) : searchId ? (
-          <div className="bg-white rounded-xl shadow-sm p-8 flex flex-col items-center justify-center text-center">
-            <AlertCircle className="w-12 h-12 text-red-400 mx-auto mb-4" />
-            <p className="text-slate-900 font-semibold text-lg">Patient Not Found</p>
-            <p className="text-slate-600">Please check the patient ID and try again</p>
-          </div>
-        ) : (
-          <div className="bg-white rounded-xl shadow-sm p-8 flex flex-col items-center justify-center text-center">
-            <Search className="w-12 h-12 text-blue-300 mx-auto mb-4" />
-            <p className="text-slate-600">Enter a patient ID to view details</p>
-          </div>
-        )}
-      </div>
+function Info({ label, value, icon }: { label: string; value: string; icon?: React.ReactNode }) {
+  return (
+    <div className="rounded-lg bg-slate-50 p-3 text-sm">
+      <p className="flex items-center gap-2 text-slate-500">{icon}{label}</p>
+      <p className="mt-1 font-medium text-slate-900">{value}</p>
     </div>
   );
 }

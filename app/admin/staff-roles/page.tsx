@@ -20,12 +20,12 @@ const emptyForm: StaffFormState = {
   email: '',
   password: '',
   phone: '',
-  role: 'nurse',
+  role: 'doctor_admin',
   status: 'active',
 };
 
-const roles = ['doctor', 'nurse', 'lab_technician', 'admin'];
-const addStaffRoles = ['nurse', 'admin'];
+const roles = ['doctor_admin', 'patient_admin', 'doctor', 'nurse_admin', 'nurse', 'lab_admin', 'lab_technician', 'ground_staff_admin', 'ground_staff', 'offline_patient', 'reception', 'admin'];
+const addStaffRoles = ['doctor_admin', 'patient_admin', 'nurse_admin', 'lab_admin', 'ground_staff_admin', 'offline_patient', 'reception', 'admin'];
 
 export default function StaffRolesPage() {
   const [users, setUsers] = useState<StaffUser[]>([]);
@@ -68,6 +68,10 @@ export default function StaffRolesPage() {
   const counters = useMemo(
     () => ({
       doctors: users.filter((u) => u.role === 'doctor').length,
+      doctorAdmins: users.filter((u) => u.role === 'doctor_admin').length,
+      patientAdmins: users.filter((u) => u.role === 'patient_admin').length,
+      nurseAdmins: users.filter((u) => u.role === 'nurse_admin').length,
+      groundStaffAdmins: users.filter((u) => u.role === 'ground_staff_admin').length,
       nurses: users.filter((u) => u.role === 'nurse').length,
       lab: users.filter((u) => u.role === 'lab_technician').length,
       admins: users.filter((u) => u.role === 'admin').length,
@@ -77,6 +81,11 @@ export default function StaffRolesPage() {
 
   const save = async () => {
     try {
+      if (!editing && !form.password.trim()) {
+        setError('Password is required when creating a staff account.');
+        return;
+      }
+
       if (editing) {
         await adminApi.updateUser(editing.id, {
           first_name: form.first_name,
@@ -152,8 +161,12 @@ export default function StaffRolesPage() {
         </div>
       </div>
 
-      <div className="grid gap-4 sm:grid-cols-4">
+      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6">
         {[
+          ['Doctor Admins', counters.doctorAdmins],
+          ['Patient Admins', counters.patientAdmins],
+          ['Nurse Admins', counters.nurseAdmins],
+          ['Ground Admins', counters.groundStaffAdmins],
           ['Doctors', counters.doctors],
           ['Nurses', counters.nurses],
           ['Lab Techs', counters.lab],
@@ -191,7 +204,7 @@ export default function StaffRolesPage() {
           <option value="">All roles</option>
           {roles.map((r) => (
             <option key={r} value={r}>
-              {r}
+              {r.replaceAll('_', ' ')}
             </option>
           ))}
         </select>
@@ -223,7 +236,7 @@ export default function StaffRolesPage() {
               </p>
               <p className="text-sm text-slate-500">{u.email}</p>
               <p className="mt-2 text-xs">
-                {u.role} • {u.status}
+                {u.role.replaceAll('_', ' ')} • {u.status}
               </p>
 
               <div className="mt-3 flex gap-2">
@@ -333,6 +346,7 @@ export default function StaffRolesPage() {
                   onChange={(e) => setForm((s) => ({ ...s, password: e.target.value }))}
                   placeholder="Password"
                   type="password"
+                  required
                   className="rounded-xl border px-3 py-2 text-sm md:col-span-2"
                 />
               ) : null}
@@ -344,7 +358,7 @@ export default function StaffRolesPage() {
               >
                 {(editing ? roles : addStaffRoles).map((r) => (
                   <option key={r} value={r}>
-                    {r}
+                    {r.replaceAll('_', ' ')}
                   </option>
                 ))}
               </select>
