@@ -159,10 +159,15 @@ export function Footer() {
                   </p>
                 </div>
               </div>
-              {/* <div className="flex gap-3">
-                <Mail className="w-5 h-5 text-emerald-400 flex-shrink-0 mt-1" />
-                <p className="text-slate-400 text-sm">{hospitalInfo.contact.email}</p>
-              </div> */}
+              <div className="flex gap-3">
+                <Mail className="w-5 h-5 text-emerald-400 flex-shrink-0 mt-0.5" />
+                <a
+                  href={`mailto:${hospitalInfo.contact.email}`}
+                  className="text-slate-400 hover:text-emerald-400 text-sm transition break-all"
+                >
+                  {hospitalInfo.contact.email}
+                </a>
+              </div>
               <div className="flex gap-3">
                 <MapPin className="w-5 h-5 text-emerald-400 flex-shrink-0 mt-1" />
                 <p className="text-slate-400 text-sm">

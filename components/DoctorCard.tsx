@@ -1,6 +1,6 @@
 import Image from "next/image";
 import Link from "next/link";
-import { CalendarDays, Phone, Stethoscope, UserRound } from "lucide-react";
+import { CalendarDays, Stethoscope, UserRound } from "lucide-react";
 
 export interface PublicDoctor {
   id: number;
@@ -55,22 +55,12 @@ export function DoctorCard({ doctor, showContact = false }: DoctorCardProps) {
             </span>
           </p>
           {showContact && (
-            <>
-              <p className="flex items-center gap-2 text-sm text-slate-700">
-                <Stethoscope className="h-4 w-4 text-emerald-500" />
-                <span>
-                  <span className="font-semibold">Department:</span> {doctor.department}
-                </span>
-              </p>
-              {doctor.phone ? (
-                <p className="flex items-center gap-2 text-sm text-slate-700">
-                  <Phone className="h-4 w-4 text-emerald-500" />
-                  <span>
-                    <span className="font-semibold">Phone:</span> {doctor.phone}
-                  </span>
-                </p>
-              ) : null}
-            </>
+            <p className="flex items-center gap-2 text-sm text-slate-700">
+              <Stethoscope className="h-4 w-4 text-emerald-500" />
+              <span>
+                <span className="font-semibold">Department:</span> {doctor.department}
+              </span>
+            </p>
           )}
         </div>
 

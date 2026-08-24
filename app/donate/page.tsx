@@ -423,92 +423,7 @@ export default function DonationPage() {
         />
 
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-          {/* Impact Section - Expanded with more cards */}
-          <div className="mb-16">
-            <div className="text-center mb-10">
-              <h2 className="text-3xl font-bold text-slate-900 mb-4">
-                Where Your Donation Goes
-              </h2>
-              <p className="text-slate-600 max-w-2xl mx-auto">
-                Your contribution directly supports our mission to provide
-                quality healthcare for all. Here's how your generosity creates
-                impact.
-              </p>
-            </div>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {impacts.map((item, index) => {
-                const Icon = item.icon;
-                return (
-                  <div
-                    key={index}
-                    className="bg-white rounded-xl shadow-sm border border-slate-100 p-6 hover:shadow-md transition-all group"
-                  >
-                    <div className="w-12 h-12 bg-emerald-100 rounded-lg flex items-center justify-center mb-4 group-hover:bg-emerald-200 transition-colors">
-                      <Icon className="w-6 h-6 text-emerald-600" />
-                    </div>
-                    <h3 className="text-lg font-semibold text-slate-900 mb-2">
-                      {item.title}
-                    </h3>
-                    <p className="text-slate-600 text-sm mb-3">
-                      {item.description}
-                    </p>
-                    <p className="text-emerald-600 font-semibold">
-                      ₹{new Intl.NumberFormat("en-IN").format(item.amount)}+
-                    </p>
-                    <p className="text-xs text-slate-400 mt-2">{item.impact}</p>
-                  </div>
-                );
-              })}
-            </div>
-          </div>
 
-          {/* Big Paragraph Cards Section - NEW SECTION following same pattern */}
-          <div className="mb-16">
-            <div className="text-center mb-10">
-              <div className="flex justify-center mb-3">
-                <div className="bg-emerald-100 p-2 rounded-full">
-                  <FileText className="w-8 h-8 text-emerald-600" />
-                </div>
-              </div>
-              <h2 className="text-3xl font-bold text-slate-900 mb-4">
-                Understanding Our Work
-              </h2>
-              <p className="text-slate-600 max-w-2xl mx-auto">
-                Dive deeper into our mission, impact model, and how your support
-                transforms healthcare accessibility across India
-              </p>
-            </div>
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-              {bigParagraphCards.map((card, index) => {
-                const Icon = card.icon;
-                return (
-                  <div
-                    key={index}
-                    className="bg-white rounded-2xl shadow-lg border border-slate-100 overflow-hidden hover:shadow-xl transition-all group"
-                  >
-                    <div className="bg-gradient-to-r from-emerald-50 to-teal-50 p-6 border-b border-slate-100">
-                      <div className="flex items-center gap-3">
-                        <div className="w-12 h-12 bg-white rounded-xl flex items-center justify-center shadow-sm">
-                          <Icon className="w-6 h-6 text-emerald-600" />
-                        </div>
-                        <h3 className="text-xl font-bold text-slate-900">
-                          {card.title}
-                        </h3>
-                      </div>
-                    </div>
-                    <div className="p-6 space-y-4">
-                      {card.paragraphs.map((paragraph, pIndex) => (
-                        <p key={pIndex} className="text-slate-600 leading-relaxed">
-                          {paragraph}
-                        </p>
-                      ))}
-                      
-                    </div>
-                  </div>
-                );
-              })}
-            </div>
-          </div>
 
           {/* Donation Form Section */}
           <div className="grid lg:grid-cols-2 gap-10 mb-16">
@@ -853,12 +768,12 @@ export default function DonationPage() {
                     </p>
                     <div className="bg-slate-50 rounded-lg p-3 space-y-1 text-sm">
                       <p className="text-slate-500">
-                        Account Name: Mefigure Siddhi Vadanta
+                        Account Name: Mefigure Siddhi Vadanta foundation
                       </p>
-                      <p className="text-slate-500">Account No: 123456789012</p>
-                      <p className="text-slate-500">IFSC Code: SBIN0012345</p>
+                      <p className="text-slate-500">Account No: 95952100003204</p>
+                      <p className="text-slate-500">IFSC Code: BARB0BUPGBX</p>
                       <p className="text-slate-500">
-                        Bank: State Bank of India
+                        Bank: Uttar pradesh gramin bank
                       </p>
                     </div>
                   </div>
@@ -866,19 +781,107 @@ export default function DonationPage() {
                     <p className="text-sm font-medium text-slate-700 mb-2">
                       UPI / QR Code
                     </p>
-<div className="bg-slate-50 rounded-lg p-4 text-center">
-  <div className="relative w-100 h-100 mx-auto overflow-hidden">
-    <Image
-      src="/images/upi-scr.png"
-      alt="UPI QR Code"
-      fill
-      className="object-contain p-2"
-    />
-  </div>
-</div>
+                    <div className="bg-slate-50 rounded-lg p-4 text-center">
+                      <div className="relative w-100 h-100 mx-auto overflow-hidden">
+                        <Image
+                          src="/images/upi-scr.png"
+                          alt="UPI QR Code"
+                          fill
+                          className="object-contain p-2"
+                        />
+                      </div>
+                    </div>
                   </div>
                 </div>
               </div>
+            </div>
+          </div>
+
+
+          {/* Impact Section - Expanded with more cards */}
+          <div className="mb-16">
+            <div className="text-center mb-10">
+              <h2 className="text-3xl font-bold text-slate-900 mb-4">
+                Where Your Donation Goes
+              </h2>
+              <p className="text-slate-600 max-w-2xl mx-auto">
+                Your contribution directly supports our mission to provide
+                quality healthcare for all. Here's how your generosity creates
+                impact.
+              </p>
+            </div>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {impacts.map((item, index) => {
+                const Icon = item.icon;
+                return (
+                  <div
+                    key={index}
+                    className="bg-white rounded-xl shadow-sm border border-slate-100 p-6 hover:shadow-md transition-all group"
+                  >
+                    <div className="w-12 h-12 bg-emerald-100 rounded-lg flex items-center justify-center mb-4 group-hover:bg-emerald-200 transition-colors">
+                      <Icon className="w-6 h-6 text-emerald-600" />
+                    </div>
+                    <h3 className="text-lg font-semibold text-slate-900 mb-2">
+                      {item.title}
+                    </h3>
+                    <p className="text-slate-600 text-sm mb-3">
+                      {item.description}
+                    </p>
+                    <p className="text-emerald-600 font-semibold">
+                      ₹{new Intl.NumberFormat("en-IN").format(item.amount)}+
+                    </p>
+                    <p className="text-xs text-slate-400 mt-2">{item.impact}</p>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+
+          {/* Big Paragraph Cards Section - NEW SECTION following same pattern */}
+          <div className="mb-16">
+            <div className="text-center mb-10">
+              <div className="flex justify-center mb-3">
+                <div className="bg-emerald-100 p-2 rounded-full">
+                  <FileText className="w-8 h-8 text-emerald-600" />
+                </div>
+              </div>
+              <h2 className="text-3xl font-bold text-slate-900 mb-4">
+                Understanding Our Work
+              </h2>
+              <p className="text-slate-600 max-w-2xl mx-auto">
+                Dive deeper into our mission, impact model, and how your support
+                transforms healthcare accessibility across India
+              </p>
+            </div>
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+              {bigParagraphCards.map((card, index) => {
+                const Icon = card.icon;
+                return (
+                  <div
+                    key={index}
+                    className="bg-white rounded-2xl shadow-lg border border-slate-100 overflow-hidden hover:shadow-xl transition-all group"
+                  >
+                    <div className="bg-gradient-to-r from-emerald-50 to-teal-50 p-6 border-b border-slate-100">
+                      <div className="flex items-center gap-3">
+                        <div className="w-12 h-12 bg-white rounded-xl flex items-center justify-center shadow-sm">
+                          <Icon className="w-6 h-6 text-emerald-600" />
+                        </div>
+                        <h3 className="text-xl font-bold text-slate-900">
+                          {card.title}
+                        </h3>
+                      </div>
+                    </div>
+                    <div className="p-6 space-y-4">
+                      {card.paragraphs.map((paragraph, pIndex) => (
+                        <p key={pIndex} className="text-slate-600 leading-relaxed">
+                          {paragraph}
+                        </p>
+                      ))}
+
+                    </div>
+                  </div>
+                );
+              })}
             </div>
           </div>
 

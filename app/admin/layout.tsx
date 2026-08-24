@@ -10,7 +10,7 @@ import {
   LayoutDashboard, Users, Shield, Activity, Settings, LogOut,
   Bell, Search, Menu, Heart, Calendar, FlaskConical, Stethoscope,
   BarChart3, MessageSquare, Building2, FileText, TestTube,
-  ChevronDown, Plus, X
+  ChevronDown, Plus, X, ImageIcon
 } from 'lucide-react';
 
 // Navigation configuration
@@ -33,6 +33,7 @@ const navigation = {
     { href: '/admin/activity', label: 'Activity Logs', icon: Activity, exact: false },
   ],
   system: [
+    { href: '/admin/gallery', label: 'Gallery', icon: ImageIcon, exact: false },
     { href: '/admin/hero-banners', label: 'Hero Banners', icon: FileText, exact: false },
     { href: '/admin/settings', label: 'Settings', icon: Settings, exact: false },
   ],

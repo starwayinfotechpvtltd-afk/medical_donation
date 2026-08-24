@@ -1,285 +1,373 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Image from "next/image";
+import Link from "next/link";
 import { Navbar } from "@/components/Navbar";
 import { Footer } from "@/components/Footer";
-import { X, ZoomIn, LayoutGrid, Tag } from "lucide-react";
+import {
+  LayoutGrid,
+  Search,
+  ArrowRight,
+  ImageIcon,
+  Sparkles,
+  Layers,
+  Building2,
+  RefreshCw,
+} from "lucide-react";
+import {
+  galleryApi,
+  getMediaUrl,
+  type GalleryCategory,
+} from "@/lib/gallery-api";
 
-const galleryImages = [
+// Fallback initial demo categories in case database is empty or not yet migrated
+const DEMO_CATEGORIES: GalleryCategory[] = [
   {
     id: 1,
-    title: "Modern Hospital Building",
-    category: "Infrastructure",
-    image: "https://images.unsplash.com/photo-1576091160550-2173dba999ef?w=800&h=600&fit=crop",
-    span: "tall", // card height variant
+    name: "Infrastructure & Campus",
+    slug: "infrastructure-campus",
+    description: "Modern architectural design, sustainable hospital campus, and smart facilities.",
+    media_count: 34,
+    photo_count: 34,
+    covers: [
+      "https://images.unsplash.com/photo-1587351021759-3e566b6af7cc?w=800&q=80",
+      "https://images.unsplash.com/photo-1519494026892-80bbd2d6fd0d?w=800&q=80",
+      "https://images.unsplash.com/photo-1586773860418-d37222d8fce3?w=800&q=80",
+      "https://images.unsplash.com/photo-1576091160550-2173dba999ef?w=800&q=80",
+    ],
   },
   {
     id: 2,
-    title: "Patient Ward",
-    category: "Facilities",
-    image: "https://images.unsplash.com/photo-1631217b5bafb1b51d5f5ff004a3b814?w=800&h=500&fit=crop",
-    span: "normal",
+    name: "Operation Theatres & ICU",
+    slug: "operation-theatres-icu",
+    description: "State-of-the-art surgical suites equipped with modern robotic and laparoscopic tools.",
+    media_count: 18,
+    photo_count: 18,
+    covers: [
+      "https://images.unsplash.com/photo-1579684385127-1ef15d508118?w=800&q=80",
+      "https://images.unsplash.com/photo-1551076805-e1869033e561?w=800&q=80",
+      "https://images.unsplash.com/photo-1583912267670-6575ad472688?w=800&q=80",
+      "https://images.unsplash.com/photo-1516549655169-df83a0774514?w=800&q=80",
+    ],
   },
   {
     id: 3,
-    title: "Operation Theater",
-    category: "Medical",
-    image: "https://images.unsplash.com/photo-1576091160395-112122c7d029?w=800&h=500&fit=crop",
-    span: "normal",
+    name: "Diagnostic & Radiology Lab",
+    slug: "diagnostic-radiology-lab",
+    description: "High-precision MRI, CT-Scan, automated pathology and molecular diagnosis laboratories.",
+    media_count: 26,
+    photo_count: 26,
+    covers: [
+      "https://images.unsplash.com/photo-1516549655169-df83a0774514?w=800&q=80",
+      "https://images.unsplash.com/photo-1579154204601-01d430248e4d?w=800&q=80",
+      "https://images.unsplash.com/photo-1584515979956-d9f6e5d09982?w=800&q=80",
+      "https://images.unsplash.com/photo-1530497610245-94d3c16cda28?w=800&q=80",
+    ],
   },
   {
     id: 4,
-    title: "Diagnostic Center",
-    category: "Medical",
-    image: "https://images.unsplash.com/photo-1584308666744-24d5f400f6f1?w=800&h=600&fit=crop",
-    span: "tall",
+    name: "Patient Rooms & Suites",
+    slug: "patient-rooms-suites",
+    description: "Comfortable, hygienic private recovery rooms and specialized pediatric care wards.",
+    media_count: 42,
+    photo_count: 42,
+    covers: [
+      "https://images.unsplash.com/photo-1631217868264-e5b90bb7e133?w=800&q=80",
+      "https://images.unsplash.com/photo-1512678080530-7760d81faba6?w=800&q=80",
+      "https://images.unsplash.com/photo-1586773860418-d37222d8fce3?w=800&q=80",
+      "https://images.unsplash.com/photo-1519494026892-80bbd2d6fd0d?w=800&q=80",
+    ],
   },
   {
     id: 5,
-    title: "Emergency Department",
-    category: "Facilities",
-    image: "https://images.unsplash.com/photo-1519494026892-80bbd2d6fd0d?w=800&h=500&fit=crop",
-    span: "normal",
+    name: "Emergency & Trauma Care",
+    slug: "emergency-trauma-care",
+    description: "24/7 fully-equipped critical trauma response units and mobile ambulance fleet.",
+    media_count: 15,
+    photo_count: 15,
+    covers: [
+      "https://images.unsplash.com/photo-1587351021759-3e566b6af7cc?w=800&q=80",
+      "https://images.unsplash.com/photo-1584515979956-d9f6e5d09982?w=800&q=80",
+      "https://images.unsplash.com/photo-1519494026892-80bbd2d6fd0d?w=800&q=80",
+      "https://images.unsplash.com/photo-1579684385127-1ef15d508118?w=800&q=80",
+    ],
   },
   {
     id: 6,
-    title: "ICU Unit",
-    category: "Facilities",
-    image: "https://images.unsplash.com/photo-1579154204601-01d430248e4d?w=800&h=600&fit=crop",
-    span: "tall",
-  },
-  {
-    id: 7,
-    title: "Laboratory",
-    category: "Medical",
-    image: "https://images.unsplash.com/photo-1530026186672-2cd00ffc50fe?w=800&h=500&fit=crop",
-    span: "normal",
-  },
-  {
-    id: 8,
-    title: "Pharmacy Section",
-    category: "Facilities",
-    image: "https://images.unsplash.com/photo-1587854692152-cbe660dbde88?w=800&h=500&fit=crop",
-    span: "normal",
-  },
-  {
-    id: 9,
-    title: "Rehabilitation Center",
-    category: "Facilities",
-    image: "https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?w=800&h=600&fit=crop",
-    span: "tall",
+    name: "Pharmacy & Wellness",
+    slug: "pharmacy-wellness",
+    description: "In-house automated dispensary and physiotherapy recovery centres.",
+    media_count: 22,
+    photo_count: 22,
+    covers: [
+      "https://images.unsplash.com/photo-1587854692152-cbe660dbde88?w=800&q=80",
+      "https://images.unsplash.com/photo-1576091160395-112122c7d029?w=800&q=80",
+      "https://images.unsplash.com/photo-1576091160550-2173dba999ef?w=800&q=80",
+      "https://images.unsplash.com/photo-1631217868264-e5b90bb7e133?w=800&q=80",
+    ],
   },
 ];
 
-const categories = ["All", "Infrastructure", "Facilities", "Medical"];
+export default function GalleryPage() {
+  const [categories, setCategories] = useState<GalleryCategory[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [search, setSearch] = useState("");
 
-const categoryColors: Record<string, string> = {
-  Infrastructure: "bg-emerald-100 text-emerald-700",
-  Facilities:     "bg-teal-100 text-teal-700",
-  Medical:        "bg-sky-100 text-sky-700",
-};
+  const loadCategories = async () => {
+    try {
+      setLoading(true);
+      const data = await galleryApi.getCategories();
+      if (data && data.length > 0) {
+        setCategories(data);
+      } else {
+        setCategories(DEMO_CATEGORIES);
+      }
+    } catch {
+      // Fallback gracefully to demo categories if server/DB is not migrated yet
+      setCategories(DEMO_CATEGORIES);
+    } finally {
+      setLoading(false);
+    }
+  };
 
-type GalleryImage = (typeof galleryImages)[0];
+  useEffect(() => {
+    loadCategories();
+  }, []);
 
-export default function Gallery() {
-  const [selectedCategory, setSelectedCategory] = useState("All");
-  const [selectedImage, setSelectedImage] = useState<GalleryImage | null>(null);
-
-  const filteredImages =
-    selectedCategory === "All"
-      ? galleryImages
-      : galleryImages.filter((img) => img.category === selectedCategory);
+  const filteredCategories = categories.filter((cat) =>
+    cat.name.toLowerCase().includes(search.toLowerCase()) ||
+    (cat.description && cat.description.toLowerCase().includes(search.toLowerCase()))
+  );
 
   return (
     <>
       <Navbar />
-      <main>
+      <main className="min-h-screen bg-slate-50/60 pb-28 pt-28">
+        {/* ── HERO BANNER ────────────────────────────────────────── */}
+        <section className="relative mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 mb-12">
+          <div className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-slate-900 via-emerald-950 to-teal-900 p-8 sm:p-12 lg:p-16 text-white shadow-2xl">
+            {/* Ambient background glow */}
+            <div className="absolute -right-20 -top-20 h-96 w-96 rounded-full bg-emerald-500/20 blur-3xl pointer-events-none" />
+            <div className="absolute -left-20 -bottom-20 h-96 w-96 rounded-full bg-teal-500/20 blur-3xl pointer-events-none" />
 
-        {/* ── HERO ──────────────────────────────────────────────── */}
-        <section className="relative bg-gradient-to-r from-emerald-600 to-teal-600 py-20 overflow-hidden">
-          {/* Dot-grid texture */}
-          <div
-            className="pointer-events-none absolute inset-0 opacity-10"
-            style={{
-              backgroundImage: "radial-gradient(circle, #fff 1px, transparent 1px)",
-              backgroundSize: "28px 28px",
-            }}
-          />
-          {/* Soft light blobs */}
-          <div className="pointer-events-none absolute -top-24 -left-24 h-80 w-80 rounded-full bg-white/10 blur-3xl" />
-          <div className="pointer-events-none absolute -bottom-24 -right-24 h-80 w-80 rounded-full bg-white/10 blur-3xl" />
+            {/* Subtle grid pattern */}
+            <div
+              className="pointer-events-none absolute inset-0 opacity-10"
+              style={{
+                backgroundImage: "radial-gradient(circle, #fff 1px, transparent 1px)",
+                backgroundSize: "28px 28px",
+              }}
+            />
 
-          <div className="relative mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-            <div className="flex flex-col lg:flex-row lg:items-end lg:justify-between gap-8">
-              {/* Left */}
-              <div>
-                <div className="inline-flex items-center gap-2 rounded-full bg-white/20 backdrop-blur-sm px-4 py-1.5 text-xs font-semibold uppercase tracking-widest text-white mb-6">
-                  <LayoutGrid className="h-3 w-3" /> Hospital Gallery
+            <div className="relative z-10 flex flex-col md:flex-row md:items-end md:justify-between gap-8">
+              <div className="max-w-2xl">
+                <div className="inline-flex items-center gap-2 rounded-full bg-emerald-500/20 border border-emerald-400/30 px-3.5 py-1 text-xs font-semibold uppercase tracking-wider text-emerald-300 backdrop-blur-md mb-4">
+                  <Sparkles className="h-3.5 w-3.5" />
+                  Hospital Visual Tour
                 </div>
-                <h1 className="text-5xl md:text-6xl font-bold text-white leading-tight mb-4">
-                  A glimpse inside
-                  <br />
-                  <span className="text-white/80">our world-class</span> facilities
+                <h1 className="text-4xl sm:text-5xl font-extrabold tracking-tight text-white leading-tight">
+                  Hospital <span className="text-emerald-400">Photo Gallery</span>
                 </h1>
-                <p className="text-emerald-100 text-lg max-w-xl leading-relaxed">
-                  Explore the spaces where healing happens — from cutting-edge
-                  operating theatres to tranquil recovery wards.
+                <p className="mt-3 text-base sm:text-lg text-slate-300 leading-relaxed">
+                  Explore our modern medical campus, specialized care units, advanced laboratories, and patient healing environments through curated collections.
                 </p>
               </div>
 
+              {/* Quick stats badge */}
+              <div className="flex items-center gap-4 bg-white/10 border border-white/10 backdrop-blur-md rounded-2xl p-4 shrink-0">
+                <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-emerald-500/30 text-emerald-300">
+                  <Layers className="h-6 w-6" />
+                </div>
+                <div>
+                  <div className="text-2xl font-bold text-white">
+                    {categories.length}
+                  </div>
+                  <div className="text-xs text-slate-300 font-medium">
+                    Categories
+                  </div>
+                </div>
+              </div>
             </div>
           </div>
         </section>
 
-        {/* ── GALLERY ───────────────────────────────────────────── */}
-        <section className="py-20 bg-white">
-          <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-
-            {/* Section label + filter bar */}
-            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-6 mb-12">
-              <div>
-                <span className="text-xs font-bold uppercase tracking-widest text-emerald-600">
-                  Our Facilities
-                </span>
-                <h2 className="mt-1 text-3xl font-bold text-slate-900">
-                  Discover what's inside
-                </h2>
-              </div>
-
-              {/* Filter pills */}
-              <div className="flex flex-wrap gap-2">
-                {categories.map((cat) => (
-                  <button
-                    key={cat}
-                    onClick={() => setSelectedCategory(cat)}
-                    className={`inline-flex items-center gap-1.5 px-5 py-2 rounded-full text-sm font-medium transition-all border ${
-                      selectedCategory === cat
-                        ? "bg-emerald-600 text-white border-emerald-600 shadow-sm shadow-emerald-200"
-                        : "bg-white text-slate-600 border-slate-200 hover:border-emerald-300 hover:text-emerald-700"
-                    }`}
-                  >
-                    {cat !== "All" && <Tag className="h-3 w-3" />}
-                    {cat}
-                  </button>
-                ))}
-              </div>
+        {/* ── CONTROLS / SEARCH BAR ──────────────────────────────── */}
+        <section className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 mb-8">
+          <div className="flex flex-col sm:flex-row items-center justify-between gap-4 bg-white rounded-2xl p-4 shadow-sm border border-slate-200/80">
+            {/* Search Input */}
+            <div className="relative w-full sm:max-w-md">
+              <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
+              <input
+                type="text"
+                placeholder="Search categories (e.g. ICU, Lab, Campus)..."
+                value={search}
+                onChange={(e) => setSearch(e.target.value)}
+                className="w-full rounded-xl border border-slate-200 bg-slate-50/70 pl-10 pr-4 py-2.5 text-sm text-slate-800 placeholder:text-slate-400 focus:border-emerald-500 focus:bg-white focus:outline-none focus:ring-2 focus:ring-emerald-500/20 transition-all"
+              />
             </div>
 
-            {/* Masonry-style grid */}
-            {filteredImages.length > 0 ? (
-              <div className="columns-1 sm:columns-2 lg:columns-3 gap-5 space-y-5">
-                {filteredImages.map((img) => (
-                  <div
-                    key={img.id}
-                    onClick={() => setSelectedImage(img)}
-                    className="group relative break-inside-avoid cursor-pointer rounded-2xl overflow-hidden border border-slate-100 shadow-sm hover:shadow-lg hover:-translate-y-1 transition-all duration-300"
+            {/* Total items note */}
+            <div className="text-xs font-semibold text-slate-500 uppercase tracking-wide px-2">
+              Showing {filteredCategories.length} {filteredCategories.length === 1 ? "Category" : "Categories"}
+            </div>
+          </div>
+        </section>
+
+        {/* ── CATEGORY MOSAIC GRID (MATCHING REFERENCE IMAGE) ───── */}
+        <section className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+          {loading ? (
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+              {[1, 2, 3, 4, 5, 6, 7, 8].map((n) => (
+                <div
+                  key={n}
+                  className="rounded-2xl border border-slate-200 bg-white p-3 space-y-3 animate-pulse shadow-sm"
+                >
+                  <div className="h-44 w-full rounded-xl bg-slate-200" />
+                  <div className="h-5 w-3/4 rounded bg-slate-200" />
+                  <div className="h-4 w-1/4 rounded bg-slate-200" />
+                </div>
+              ))}
+            </div>
+          ) : filteredCategories.length > 0 ? (
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+              {filteredCategories.map((category) => {
+                const covers = category.covers || [];
+                const count = category.media_count || covers.length || 0;
+
+                return (
+                  <Link
+                    key={category.id}
+                    href={`/gallery/${category.slug}`}
+                    className="group flex flex-col rounded-2xl bg-white border border-slate-200/90 shadow-sm hover:shadow-xl hover:border-emerald-300 transition-all duration-300 overflow-hidden hover:-translate-y-1"
                   >
-                    {/* Image */}
-                    <div className={`relative w-full bg-slate-100 ${img.span === "tall" ? "h-72" : "h-52"}`}>
-                      <Image
-                        src={img.image}
-                        alt={img.title}
-                        fill
-                        className="object-cover group-hover:scale-105 transition-transform duration-500"
-                        sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
-                      />
-                      {/* Hover overlay */}
-                      <div className="absolute inset-0 bg-gradient-to-t from-emerald-900/50 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-end justify-between p-4">
-                        <span className="text-white text-sm font-semibold">{img.title}</span>
-                        <span className="flex h-8 w-8 items-center justify-center rounded-full bg-white/20 backdrop-blur-sm">
-                          <ZoomIn className="h-4 w-4 text-white" />
-                        </span>
+                    {/* MOSAIC IMAGE THUMBNAIL (Collage matching reference photo) */}
+                    <div className="relative p-2.5 pb-0">
+                      <div className="relative h-48 w-full overflow-hidden rounded-xl bg-slate-100">
+                        {covers.length >= 3 ? (
+                          // 3+ Images: 2 stacked on left, 1 tall on right (Exact layout from reference)
+                          <div className="grid h-full w-full grid-cols-12 gap-1.5 p-1 bg-slate-50">
+                            {/* Left Column (2 small stacked images) */}
+                            <div className="col-span-5 flex flex-col gap-1.5 h-full">
+                              <div className="relative flex-1 rounded-lg overflow-hidden bg-slate-200">
+                                <Image
+                                  src={getMediaUrl(covers[0])}
+                                  alt={category.name}
+                                  fill
+                                  sizes="(max-width: 640px) 50vw, (max-width: 1024px) 25vw, 20vw"
+                                  className="object-cover group-hover:scale-105 transition-transform duration-500"
+                                />
+                              </div>
+                              <div className="relative flex-1 rounded-lg overflow-hidden bg-slate-200">
+                                <Image
+                                  src={getMediaUrl(covers[1])}
+                                  alt={category.name}
+                                  fill
+                                  sizes="(max-width: 640px) 50vw, (max-width: 1024px) 25vw, 20vw"
+                                  className="object-cover group-hover:scale-105 transition-transform duration-500"
+                                />
+                              </div>
+                            </div>
+
+                            {/* Right Column (1 large prominent vertical image) */}
+                            <div className="col-span-7 relative h-full rounded-lg overflow-hidden bg-slate-200">
+                              <Image
+                                src={getMediaUrl(covers[2])}
+                                alt={category.name}
+                                fill
+                                sizes="(max-width: 640px) 50vw, (max-width: 1024px) 25vw, 20vw"
+                                className="object-cover group-hover:scale-105 transition-transform duration-500"
+                              />
+                            </div>
+                          </div>
+                        ) : covers.length === 2 ? (
+                          // 2 Images: Split side by side
+                          <div className="grid h-full w-full grid-cols-2 gap-1.5 p-1 bg-slate-50">
+                            <div className="relative h-full rounded-lg overflow-hidden bg-slate-200">
+                              <Image
+                                src={getMediaUrl(covers[0])}
+                                alt={category.name}
+                                fill
+                                sizes="(max-width: 640px) 50vw, 25vw"
+                                className="object-cover group-hover:scale-105 transition-transform duration-500"
+                              />
+                            </div>
+                            <div className="relative h-full rounded-lg overflow-hidden bg-slate-200">
+                              <Image
+                                src={getMediaUrl(covers[1])}
+                                alt={category.name}
+                                fill
+                                sizes="(max-width: 640px) 50vw, 25vw"
+                                className="object-cover group-hover:scale-105 transition-transform duration-500"
+                              />
+                            </div>
+                          </div>
+                        ) : covers.length === 1 ? (
+                          // 1 Image: Full cover
+                          <div className="relative h-full w-full">
+                            <Image
+                              src={getMediaUrl(covers[0])}
+                              alt={category.name}
+                              fill
+                              sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 25vw"
+                              className="object-cover group-hover:scale-105 transition-transform duration-500"
+                            />
+                          </div>
+                        ) : (
+                          // Empty state placeholder
+                          <div className="flex h-full w-full flex-col items-center justify-center bg-emerald-50/60 text-emerald-600">
+                            <ImageIcon className="h-8 w-8 stroke-[1.5] opacity-70 mb-1" />
+                            <span className="text-xs font-medium text-emerald-800">
+                              Gallery Collection
+                            </span>
+                          </div>
+                        )}
+
+                        {/* Hover subtle view overlay */}
+                        <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-end justify-end p-3">
+                          <span className="flex h-8 w-8 items-center justify-center rounded-full bg-white text-slate-800 shadow-md transform translate-y-2 group-hover:translate-y-0 transition-transform duration-300">
+                            <ArrowRight className="h-4 w-4 text-emerald-600" />
+                          </span>
+                        </div>
                       </div>
                     </div>
 
-                    {/* Card footer */}
-                    <div className="flex items-center justify-between px-4 py-3 bg-white">
-                      <p className="text-sm font-semibold text-slate-800">{img.title}</p>
-                      <span className={`text-xs font-medium px-2.5 py-0.5 rounded-full ${categoryColors[img.category] ?? "bg-slate-100 text-slate-600"}`}>
-                        {img.category}
-                      </span>
+                    {/* TEXT INFORMATION (Title & Count matching reference style) */}
+                    <div className="p-4 pt-3 flex flex-col flex-1 justify-between">
+                      <div>
+                        <h3 className="font-bold text-[15px] sm:text-base text-slate-900 group-hover:text-emerald-600 transition-colors line-clamp-1">
+                          {category.name}
+                        </h3>
+                        <p className="mt-1 text-xs font-medium text-slate-400">
+                          {count} {count === 1 ? "Photo" : "Photos"}
+                        </p>
+                      </div>
                     </div>
-                  </div>
-                ))}
-              </div>
-            ) : (
-              <div className="flex flex-col items-center justify-center py-20 text-center">
-                <div className="mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-emerald-50">
-                  <LayoutGrid className="h-7 w-7 text-emerald-400" />
-                </div>
-                <p className="text-slate-500 text-lg font-medium">No images in this category.</p>
-                <button
-                  onClick={() => setSelectedCategory("All")}
-                  className="mt-4 text-sm text-emerald-600 underline underline-offset-4"
-                >
-                  View all photos
-                </button>
-              </div>
-            )}
-          </div>
-        </section>
-
-        {/* ── LIGHTBOX MODAL ────────────────────────────────────── */}
-        {selectedImage && (
-          <div
-            className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm"
-            onClick={() => setSelectedImage(null)}
-          >
-            <div
-              className="relative w-full max-w-4xl rounded-3xl overflow-hidden bg-white shadow-2xl"
-              onClick={(e) => e.stopPropagation()}
-            >
-              {/* Close button */}
-              <button
-                onClick={() => setSelectedImage(null)}
-                className="absolute top-4 right-4 z-10 flex h-9 w-9 items-center justify-center rounded-full bg-white/90 backdrop-blur-sm border border-slate-200 text-slate-600 hover:text-slate-900 hover:bg-white transition-colors shadow-sm"
-                aria-label="Close"
-              >
-                <X className="h-4 w-4" />
-              </button>
-
-              {/* Image */}
-              <div className="relative h-72 sm:h-[460px] w-full bg-slate-100">
-                <Image
-                  src={selectedImage.image}
-                  alt={selectedImage.title}
-                  fill
-                  className="object-cover"
-                  priority
-                />
-              </div>
-
-              {/* Info bar */}
-              <div className="flex items-center justify-between px-6 py-4 bg-white border-t border-slate-100">
-                <div>
-                  <h3 className="text-lg font-bold text-slate-900">{selectedImage.title}</h3>
-                  <p className="text-sm text-slate-400 mt-0.5">Hospital Facility</p>
-                </div>
-                <span className={`text-sm font-semibold px-3 py-1 rounded-full ${categoryColors[selectedImage.category] ?? "bg-slate-100 text-slate-600"}`}>
-                  {selectedImage.category}
-                </span>
-              </div>
-
-              {/* Thumbnail strip — navigate between images in same category */}
-              <div className="flex gap-2 overflow-x-auto px-6 pb-5 pt-1 scrollbar-hide">
-                {galleryImages
-                  .filter((img) => img.category === selectedImage.category && img.id !== selectedImage.id)
-                  .slice(0, 6)
-                  .map((img) => (
-                    <button
-                      key={img.id}
-                      onClick={() => setSelectedImage(img)}
-                      className="relative h-14 w-20 shrink-0 rounded-xl overflow-hidden border-2 border-transparent hover:border-emerald-400 transition-all"
-                    >
-                      <Image src={img.image} alt={img.title} fill className="object-cover" sizes="80px" />
-                    </button>
-                  ))}
-              </div>
+                  </Link>
+                );
+              })}
             </div>
-          </div>
-        )}
-
+          ) : (
+            <div className="flex flex-col items-center justify-center rounded-3xl border border-dashed border-slate-300 bg-white p-16 text-center shadow-sm">
+              <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-emerald-50 text-emerald-600 mb-4">
+                <Search className="h-8 w-8" />
+              </div>
+              <h3 className="text-lg font-bold text-slate-800">
+                No matching categories found
+              </h3>
+              <p className="mt-1 text-sm text-slate-500 max-w-sm">
+                We couldn&apos;t find any gallery categories matching &quot;{search}&quot;.
+              </p>
+              <button
+                onClick={() => setSearch("")}
+                className="mt-5 inline-flex items-center gap-2 rounded-xl bg-emerald-600 px-4 py-2 text-sm font-semibold text-white shadow-md shadow-emerald-600/20 hover:bg-emerald-700 transition"
+              >
+                <RefreshCw className="h-4 w-4" />
+                Reset Search
+              </button>
+            </div>
+          )}
+        </section>
       </main>
       <Footer />
     </>

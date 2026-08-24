@@ -163,6 +163,7 @@ export const adminApi = {
   async updateDoctorProfile(id: number, payload: Partial<{ specialization: string; qualification: string; license_number: string; years_of_experience: number; consultation_fee: number; available_days: string; available_time_start: string; available_time_end: string; image_url: string; bio: string; }>) { const response = await api.patch<Record<string, unknown>>(`/users/${id}/doctor-profile`, payload); return response.data as Record<string, unknown>; },
   async deactivateUser(id: number) { await api.patch(`/users/${id}/deactivate`, {}); },
   async deleteUser(id: number) { await api.delete(`/users/${id}`); },
+  async sendInvite(id: number) { await api.post(`/users/${id}/send-invite`, {}); },
 
   async getPatients(status?: string) { const response = await api.get<AdminPatient[]>('/admin/patients', { status }); return (response.data ?? []) as AdminPatient[]; },
   async getPatientDetail(id: number) { const response = await api.get<AdminPatientDetail>(`/admin/patients/${id}`); return response.data as AdminPatientDetail; },

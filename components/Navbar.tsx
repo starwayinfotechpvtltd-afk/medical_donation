@@ -3,7 +3,7 @@
 import Link from "next/link";
 import Image from "next/image";
 import { useState, useEffect } from "react";
-import { Menu, X, Heart, ChevronDown } from "lucide-react";
+import { Menu, X, Heart } from "lucide-react";
 import { useAuth } from "@/context/AuthContext";
 import { DonationModal } from "./DonationModal";
 import { usePathname } from "next/navigation";
@@ -12,7 +12,8 @@ import { usePathname } from "next/navigation";
 export function Navbar() {
   const [isOpen, setIsOpen] = useState(false);
   const [isDonationOpen, setIsDonationOpen] = useState(false);
-  const [showLoginDropdown, setShowLoginDropdown] = useState(false);
+
+
   const [showTopBar, setShowTopBar] = useState(true);
   const [lastScrollY, setLastScrollY] = useState(0);
 
@@ -81,20 +82,6 @@ export function Navbar() {
     "Special OPD Hours Extended till 8 PM for Working Professionals",
   ];
 
-  const loginLinks = [
-    { href: "/adminLogin", label: "Admin Login" },
-    { href: "/doctorLogin", label: "Doctor Login" },
-    { href: "/doctor-admin-dashboardLogin", label: "Doctor Admin Login" },
-    { href: "/patient-admin-dashboardLogin", label: "Patient Admin Login" },
-    { href: "/nurseLogin", label: "Nurse Login" },
-    { href: "/nurse-admin-dashboardLogin", label: "Nurse Admin Login" },
-    { href: "/labtechLogin", label: "Lab Technician Login" },
-    { href: "/lab-admin-dashboardLogin", label: "Lab Admin Login" },
-    { href: "/patient/login", label: "Patient Login" },
-    { href: "/offline-patient-dashboardLogin", label: "Offline Patient Login" },
-    { href: "/reception-dashboardLogin", label: "Receptionist Login" },
-    { href: "/ground-staff-dashboardLogin", label: "Ground Staff Login" },
-  ];
 
   return (
     <>
@@ -181,30 +168,12 @@ export function Navbar() {
 
           {/* DESKTOP CTA */}
           <div className="hidden items-center gap-4 lg:flex">
-            <div className="relative">
-              <button
-                onClick={() => setShowLoginDropdown((prev) => !prev)}
-                className="inline-flex items-center gap-2 rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm font-semibold text-slate-700 transition-all duration-300 hover:bg-slate-50"
-              >
-                Login
-                <ChevronDown className="h-4 w-4" />
-              </button>
-
-              {showLoginDropdown && (
-                <div className="absolute right-0 z-50 mt-2 w-56 overflow-hidden rounded-xl border border-slate-200 bg-white shadow-xl">
-                  {loginLinks.map((item) => (
-                    <Link
-                      key={item.href}
-                      href={item.href}
-                      onClick={() => setShowLoginDropdown(false)}
-                      className="block px-4 py-3 text-sm font-medium text-slate-700 transition hover:bg-emerald-50 hover:text-emerald-600"
-                    >
-                      {item.label}
-                    </Link>
-                  ))}
-                </div>
-              )}
-            </div>
+            <Link
+              href="/patient/login"
+              className="inline-flex items-center gap-2 rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm font-semibold text-slate-700 transition-all duration-300 hover:bg-slate-50 hover:text-emerald-600"
+            >
+              Patient Login
+            </Link>
 
             <Link
               href="/appointment"
@@ -289,23 +258,13 @@ export function Navbar() {
 
             {/* MOBILE ACTIONS */}
             <div className="mt-8 flex flex-col gap-3">
-              <div className="rounded-2xl border border-slate-200 bg-slate-50 p-3">
-                <p className="mb-2 px-2 text-xs font-semibold uppercase tracking-wide text-slate-500">
-                  Login Portals
-                </p>
-                <div className="flex flex-col gap-1">
-                  {loginLinks.map((item) => (
-                    <Link
-                      key={item.href}
-                      href={item.href}
-                      onClick={() => setIsOpen(false)}
-                      className="rounded-xl px-3 py-2 text-sm font-medium text-slate-700 transition hover:bg-white hover:text-emerald-600"
-                    >
-                      {item.label}
-                    </Link>
-                  ))}
-                </div>
-              </div>
+              <Link
+                href="/patient/login"
+                onClick={() => setIsOpen(false)}
+                className="rounded-2xl border border-slate-200 bg-white px-5 py-4 text-center text-sm font-semibold text-slate-700 transition-all duration-300 hover:bg-slate-50 hover:text-emerald-600"
+              >
+                Patient Login
+              </Link>
 
               <Link
                 href="/appointment"
