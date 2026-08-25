@@ -64,7 +64,9 @@ export interface RecentDonation {
   donor_phone?: string | null;
   transaction_ref?: string | null;
   donor_message?: string | null;
+  purpose?: string | null;
 }
+
 
 export const donationApi = {
   donate(payload: DonationPayload) {
@@ -85,5 +87,9 @@ export const donationApi = {
 
   getRecent(limit = 20) {
     return api.get<RecentDonation[]>('/donations/recent', { limit });
+  },
+
+  getPublicRecent(limit = 20) {
+    return api.get<RecentDonation[]>('/donations/public/recent', { limit });
   },
 };
